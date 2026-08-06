@@ -1,0 +1,42 @@
+:root {
+  /* Change the dashboard palette from this file only. */
+  --background: #f7f6fb;
+  --surface: #ffffff;
+  --surface-subtle: #fbfaff;
+  --surface-muted: #f0eef6;
+  --foreground: #1b1728;
+  --muted: #726d80;
+  --muted-strong: #4d475c;
+  --border: #e9e5f0;
+  --border-strong: #ddd7e7;
+
+  --primary: #6c4cf1;
+  --primary-strong: #4d31cf;
+  --primary-soft: #eee9ff;
+  --primary-foreground: #ffffff;
+
+  --secondary: #ff5d8f;
+  --secondary-soft: #ffe8ef;
+  --accent: #f5a524;
+  --accent-soft: #fff3dc;
+  --success: #25a879;
+  --success-soft: #dcf7ed;
+  --info: #4a82f6;
+  --info-soft: #e6efff;
+  --danger: #e44f63;
+  --danger-soft: #ffe7eb;
+
+  --sidebar: #171326;
+  --sidebar-surface: #221c36;
+  --sidebar-border: #302846;
+  --sidebar-text: #f8f6ff;
+  --sidebar-muted: #a9a0bc;
+  --sidebar-active: #7356f5;
+
+  --grid-dot: rgba(108, 76, 241, 0.055);
+  --scrollbar: #c6bfd2;
+  --overlay: rgba(23, 19, 38, 0.55);
+  --shadow-card: 0 18px 45px rgba(47, 35, 78, 0.07);
+  --shadow-sidebar: 14px 0 40px rgba(30, 23, 52, 0.12);
+  --font-sans: "Inter", "Avenir Next", "Segoe UI", Arial, sans-serif;
+}

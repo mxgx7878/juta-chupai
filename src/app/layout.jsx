@@ -1,9 +1,10 @@
 import "./globals.css";
+import "@/theme/tokens.css";
 import Providers from "./providers";
 
 export const metadata = {
-  title: "Juta Chupai",
-  description: "Next.js application scaffold",
+  title: "Joota Chupai Admin",
+  description: "Event marketplace administration dashboard",
 };
 
 export default function RootLayout({ children }) {

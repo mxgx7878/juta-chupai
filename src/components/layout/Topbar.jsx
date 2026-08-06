@@ -17,13 +17,14 @@ import MenuItem from "@mui/material/MenuItem";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import Divider from "@mui/material/Divider";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
+import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
 import NotificationsNoneRoundedIcon from "@mui/icons-material/NotificationsNoneRounded";
 import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
 import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
 import { notify } from "@/store/uiSlice";
 
-export default function Topbar() {
+export default function Topbar({ onMenuClick }) {
   const router = useRouter();
   const dispatch = useDispatch();
   const [anchor, setAnchor] = useState(null);
@@ -49,6 +50,14 @@ export default function Topbar() {
       }}
     >
       <Toolbar sx={{ gap: 2, minHeight: 72 }}>
+        <IconButton
+          onClick={onMenuClick}
+          aria-label="Open menu"
+          sx={{ display: { md: "none" }, bgcolor: "background.paper", border: "1px solid", borderColor: "divider", borderRadius: 2 }}
+        >
+          <MenuRoundedIcon />
+        </IconButton>
+
         <Box
           sx={{
             display: { xs: "none", sm: "flex" },

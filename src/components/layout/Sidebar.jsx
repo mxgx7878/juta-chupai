@@ -22,7 +22,7 @@ function isActive(pathname, href) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export default function Sidebar() {
+export default function Sidebar({ onNavigate }) {
   const pathname = usePathname() || "/";
 
   const bookingsBadge = useSelector((s) => s.bookings.items.filter((b) => b.status === "Pending").length);
@@ -41,6 +41,7 @@ export default function Sidebar() {
         component={Link}
         href={item.href}
         selected={active}
+        onClick={onNavigate}
         sx={{ py: 1 }}
       >
         <ListItemIcon sx={{ minWidth: 38, color: "text.secondary" }}>

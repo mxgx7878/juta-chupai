@@ -1,74 +1,228 @@
-import { ArrowRight, CalendarPlus, ChevronDown, MoreHorizontal } from "lucide-react";
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Box from "@mui/material/Box";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
+import Chip from "@mui/material/Chip";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import FileDownloadRoundedIcon from "@mui/icons-material/FileDownloadRounded";
+import EventAvailableRoundedIcon from "@mui/icons-material/EventAvailableRounded";
+import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
+import ArrowDropDownRoundedIcon from "@mui/icons-material/ArrowDropDownRounded";
+import { exportCsv } from "@/utils/exportCsv";
+
+import MetricCard from "@/components/dashboard/MetricCard";
+import SectionCard from "@/components/dashboard/SectionCard";
+import BookingsChart from "@/components/dashboard/BookingsChart";
+import CategoryPie from "@/components/dashboard/CategoryPie";
+import RecentBookingsTable from "@/components/dashboard/RecentBookingsTable";
+import VendorApprovals from "@/components/dashboard/VendorApprovals";
 import ActivityFeed from "@/components/dashboard/ActivityFeed";
-import BookingChart from "@/components/dashboard/BookingChart";
-import CategoryMix from "@/components/dashboard/CategoryMix";
-import StatCard from "@/components/dashboard/StatCard";
-import VendorQueue from "@/components/dashboard/VendorQueue";
-import { Button, SectionCard } from "@/components/ui";
-import { dashboardStats } from "@/data/dashboard";
+import { metrics } from "@/data/dashboard";
 
-export default function HomePage() {
+const PERIODS = ["This week", "This month", "This quarter", "This year"];
+
+export default function DashboardPage() {
+  const router = useRouter();
+  const [period, setPeriod] = useState("This month");
+  const [periodAnchor, setPeriodAnchor] = useState(null);
+
+  const exportReport = () =>
+    exportCsv(
+      "marketplace-report.csv",
+      metrics.map((m) => ({ Metric: m.label, Value: m.value, Change: m.change, Note: m.note })),
+    );
+
   return (
-    <div className="mx-auto max-w-[1500px]">
-      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-        <div>
-          <div className="mb-2 flex items-center gap-2">
-            <span className="rounded-full bg-[var(--primary-soft)] px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.14em] text-[var(--primary)]">Live overview</span>
-            <span className="text-[10px] text-[var(--muted)]">Thursday, 6 August</span>
-          </div>
-          <h1 className="m-0 text-2xl font-extrabold tracking-[-0.04em] text-[var(--foreground)] sm:text-[28px]">Good morning, Areeba <span aria-hidden="true">👋</span></h1>
-          <p className="mb-0 mt-1.5 text-xs text-[var(--muted)]">Here&apos;s what&apos;s happening across your event marketplace today.</p>
-        </div>
-        <Button><CalendarPlus size={16} /> Create booking</Button>
-      </div>
+    <Stack spacing={3}>
+      {/* Header */}
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
+        spacing={2}
+        sx={{ justifyContent: "space-between", alignItems: { sm: "center" } }}
+      >
+        <Box>
+          <Typography variant="overline" color="text.secondary">
+            Overview
+          </Typography>
+          <Typography variant="h4" fontWeight={800}>
+            Marketplace at a glance
+          </Typography>
+        </Box>
+        <Stack direction="row" spacing={1.5}>
+          <Button variant="outlined" color="inherit" endIcon={<ArrowDropDownRoundedIcon />} onClick={(e) => setPeriodAnchor(e.currentTarget)}>
+            {period}
+          </Button>
+          <Menu anchorEl={periodAnchor} open={Boolean(periodAnchor)} onClose={() => setPeriodAnchor(null)}>
+            {PERIODS.map((p) => (
+              <MenuItem key={p} selected={p === period} onClick={() => { setPeriod(p); setPeriodAnchor(null); }}>
+                {p}
+              </MenuItem>
+            ))}
+          </Menu>
+          <Button variant="contained" startIcon={<FileDownloadRoundedIcon />} onClick={exportReport}>
+            Export report
+          </Button>
+        </Stack>
+      </Stack>
 
-      <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        {dashboardStats.map((item) => <StatCard key={item.label} item={item} />)}
-      </div>
-
-      <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1.45fr)_minmax(320px,0.75fr)]">
-        <SectionCard
-          title="Booking momentum"
-          description="Confirmed bookings over the last 7 days"
-          action={<button type="button" className="flex items-center gap-1 rounded-lg border border-[var(--border)] px-2.5 py-1.5 text-[9px] font-semibold text-[var(--muted-strong)]">This week <ChevronDown size={12} /></button>}
+      {/* Welcome banner */}
+      <Card
+        sx={{
+          p: { xs: 3, md: 4 },
+          color: "#fff",
+          border: "none",
+          background:
+            "linear-gradient(120deg,#3730a3 0%,#4f46e5 45%,#7c3aed 100%)",
+          position: "relative",
+          overflow: "hidden",
+        }}
+      >
+        <Box
+          sx={{
+            position: "absolute",
+            right: -60,
+            top: -80,
+            width: 260,
+            height: 260,
+            borderRadius: "50%",
+            border: "1px solid rgba(255,255,255,0.12)",
+          }}
+        />
+        <Stack
+          direction={{ xs: "column", md: "row" }}
+          spacing={3}
+          sx={{ position: "relative", justifyContent: "space-between", alignItems: { md: "flex-end" } }}
         >
-          <BookingChart />
-        </SectionCard>
+          <Box sx={{ maxWidth: 560 }}>
+            <Chip
+              label="Wedding season · live"
+              size="small"
+              sx={{ bgcolor: "rgba(255,255,255,0.16)", color: "#fff", fontWeight: 700 }}
+            />
+            <Typography variant="h4" fontWeight={800} sx={{ mt: 2 }}>
+              Good morning, Ayesha
+            </Typography>
+            <Typography variant="body2" sx={{ mt: 1, opacity: 0.85 }}>
+              Bookings are up 21.6% this month across 14 cities. You have 26 vendors
+              and 3 reported reviews waiting for review.
+            </Typography>
+          </Box>
+          <Stack direction="row" spacing={1.5}>
+            <Button
+              variant="contained"
+              startIcon={<EventAvailableRoundedIcon />}
+              onClick={() => router.push("/vendors")}
+              sx={{ bgcolor: "#fff", color: "primary.main", "&:hover": { bgcolor: "#f1f1f8" } }}
+            >
+              Review approvals
+            </Button>
+            <Button
+              variant="outlined"
+              endIcon={<ArrowForwardRoundedIcon />}
+              onClick={() => router.push("/reports")}
+              sx={{ color: "#fff", borderColor: "rgba(255,255,255,0.4)" }}
+            >
+              View reports
+            </Button>
+          </Stack>
+        </Stack>
+      </Card>
 
+      {/* Metrics */}
+      <Box
+        sx={{
+          display: "grid",
+          gap: 3,
+          gridTemplateColumns: {
+            xs: "1fr",
+            sm: "repeat(2,1fr)",
+            lg: "repeat(4,1fr)",
+          },
+        }}
+      >
+        {metrics.map((m) => (
+          <MetricCard key={m.label} metric={m} />
+        ))}
+      </Box>
+
+      {/* Charts row */}
+      <Box
+        sx={{
+          display: "grid",
+          gap: 3,
+          gridTemplateColumns: { xs: "1fr", lg: "2fr 1fr" },
+        }}
+      >
         <SectionCard
-          title="Vendor approvals"
-          description="3 applications need your attention"
-          action={<button type="button" className="flex items-center gap-1 text-[9px] font-bold text-[var(--primary)]">View all <ArrowRight size={12} /></button>}
+          title="Bookings & quotes"
+          subtitle="Confirmed bookings vs. quote requests over the year"
+          action={
+            <Stack direction="row" spacing={2}>
+              <Legend color="#4f46e5" label="Bookings" />
+              <Legend color="#0ea5a4" label="Quotes" />
+            </Stack>
+          }
         >
-          <VendorQueue />
+          <BookingsChart />
         </SectionCard>
-      </div>
+        <SectionCard title="Category mix" subtitle="Share of bookings by service">
+          <CategoryPie />
+        </SectionCard>
+      </Box>
 
-      <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-[minmax(0,1.1fr)_minmax(280px,0.8fr)_minmax(280px,0.8fr)]">
+      {/* Table + activity */}
+      <Box
+        sx={{
+          display: "grid",
+          gap: 3,
+          gridTemplateColumns: { xs: "1fr", lg: "2fr 1fr" },
+        }}
+      >
         <SectionCard
-          title="Marketplace mix"
-          description="Active vendors by popular category"
-          action={<button type="button" aria-label="More category options" className="text-[var(--muted)]"><MoreHorizontal size={18} /></button>}
+          title="Recent bookings"
+          subtitle="Latest activity across the marketplace"
+          action={<Button size="small" color="inherit" onClick={() => router.push("/bookings")}>View all</Button>}
         >
-          <CategoryMix />
+          <RecentBookingsTable />
         </SectionCard>
-
-        <SectionCard title="Recent activity" description="Latest marketplace updates">
+        <SectionCard title="Activity" subtitle="Live platform events">
           <ActivityFeed />
         </SectionCard>
+      </Box>
 
-        <section className="soft-shadow relative overflow-hidden rounded-[22px] bg-[var(--sidebar)] p-5 text-white sm:p-6">
-          <div className="absolute -right-12 -top-12 size-40 rounded-full bg-[var(--primary)]/30 blur-2xl" />
-          <div className="absolute -bottom-10 -left-10 size-32 rounded-full bg-[var(--secondary)]/20 blur-2xl" />
-          <div className="relative flex h-full min-h-[210px] flex-col">
-            <span className="mb-6 grid size-10 place-items-center rounded-xl bg-white/10 text-[var(--accent)]"><CalendarPlus size={19} /></span>
-            <p className="m-0 text-[9px] font-bold uppercase tracking-[0.18em] text-[var(--sidebar-muted)]">Today&apos;s snapshot</p>
-            <h2 className="mb-2 mt-2 max-w-[230px] text-xl font-extrabold leading-tight tracking-[-0.03em]">18 celebrations are coming to life.</h2>
-            <p className="m-0 max-w-[250px] text-[10px] leading-4 text-[var(--sidebar-muted)]">You have 7 new requests and 4 vendor responses waiting.</p>
-            <button type="button" className="mt-auto flex items-center gap-2 pt-5 text-[10px] font-bold text-white">Open booking calendar <ArrowRight size={13} /></button>
-          </div>
-        </section>
-      </div>
-    </div>
+      {/* Approvals */}
+      <Box
+        sx={{
+          display: "grid",
+          gap: 3,
+          gridTemplateColumns: { xs: "1fr", lg: "2fr 1fr" },
+        }}
+      >
+        <SectionCard
+          title="Vendor approvals"
+          subtitle="New applications awaiting review"
+          action={<Button size="small" color="inherit" onClick={() => router.push("/vendors")}>Review all</Button>}
+        >
+          <VendorApprovals />
+        </SectionCard>
+      </Box>
+    </Stack>
+  );
+}
+
+function Legend({ color, label }) {
+  return (
+    <Stack direction="row" spacing={0.75} sx={{ alignItems: "center" }}>
+      <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: color }} />
+      <Typography variant="caption" color="text.secondary" fontWeight={600}>
+        {label}
+      </Typography>
+    </Stack>
   );
 }

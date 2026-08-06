@@ -1,26 +1,54 @@
-import { activityFeed } from "@/data/dashboard";
+"use client";
 
-const dotTones = {
-  primary: "bg-[var(--primary)] ring-[var(--primary-soft)]",
-  success: "bg-[var(--success)] ring-[var(--success-soft)]",
-  danger: "bg-[var(--danger)] ring-[var(--danger-soft)]",
-  accent: "bg-[var(--accent)] ring-[var(--accent-soft)]",
-};
+import Stack from "@mui/material/Stack";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import { activityFeed } from "@/data/dashboard";
 
 export default function ActivityFeed() {
   return (
-    <div className="px-5 pb-4 sm:px-6">
-      {activityFeed.map((activity, index) => (
-        <div key={activity.title} className="relative flex gap-3 pb-5 last:pb-1">
-          {index < activityFeed.length - 1 && <span className="absolute left-[5px] top-4 h-[calc(100%-8px)] w-px bg-[var(--border)]" />}
-          <span className={`relative mt-1.5 size-2.5 shrink-0 rounded-full ring-4 ${dotTones[activity.tone]}`} />
-          <div className="min-w-0 flex-1">
-            <p className="m-0 text-[11px] font-bold text-[var(--foreground)]">{activity.title}</p>
-            <p className="mb-0 mt-1 truncate text-[9px] text-[var(--muted)]">{activity.detail}</p>
-          </div>
-          <span className="shrink-0 text-[8px] font-medium text-[var(--muted)]">{activity.time}</span>
-        </div>
+    <Stack spacing={2.5} sx={{ position: "relative", pl: 0.5 }}>
+      <Box
+        sx={{
+          position: "absolute",
+          left: 6,
+          top: 6,
+          bottom: 6,
+          width: "1px",
+          bgcolor: "divider",
+        }}
+      />
+      {activityFeed.map((a) => (
+        <Stack key={a.title} direction="row" spacing={2} sx={{ position: "relative" }}>
+          <Box
+            sx={{
+              mt: "5px",
+              width: 12,
+              height: 12,
+              borderRadius: "50%",
+              flexShrink: 0,
+              bgcolor: `${a.color}.main`,
+              border: "3px solid",
+              borderColor: "background.paper",
+              boxShadow: "0 0 0 1px rgba(145,158,171,0.2)",
+              zIndex: 1,
+            }}
+          />
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Stack direction="row" spacing={1} sx={{ justifyContent: "space-between" }}>
+              <Typography variant="subtitle2" fontWeight={700}>
+                {a.title}
+              </Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ flexShrink: 0 }}>
+                {a.time}
+              </Typography>
+            </Stack>
+            <Typography variant="caption" color="text.secondary">
+              {a.detail}
+            </Typography>
+          </Box>
+        </Stack>
       ))}
-    </div>
+    </Stack>
   );
 }

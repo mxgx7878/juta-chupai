@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, Suspense } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -41,7 +41,7 @@ const AV = ["#4f46e5", "#0ea5a4", "#f59e0b", "#7c3aed", "#ec4899", "#2f6fed"];
 const TABS = ["All", "Approved", "Pending", "Rejected"];
 const initials = (n) => n.split(" ").map((p) => p[0]).join("").slice(0, 2);
 
-export default function VendorsPage() {
+function VendorsContent() {
   const items = useSelector((s) => s.vendors.items);
   const dispatch = useDispatch();
   const searchParams = useSearchParams();
@@ -207,5 +207,13 @@ export default function VendorsPage() {
         onSubmit={submit}
       />
     </Box>
+  );
+}
+
+export default function VendorsPage() {
+  return (
+    <Suspense fallback={null}>
+      <VendorsContent />
+    </Suspense>
   );
 }

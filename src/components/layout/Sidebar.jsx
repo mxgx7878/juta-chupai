@@ -1,98 +1,131 @@
-import { ArrowUpRight, Gem, Sparkles, X } from "lucide-react";
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useSelector } from "react-redux";
+import Box from "@mui/material/Box";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import List from "@mui/material/List";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
+import Chip from "@mui/material/Chip";
+import Avatar from "@mui/material/Avatar";
+import CelebrationRoundedIcon from "@mui/icons-material/CelebrationRounded";
 import { navigationGroups, secondaryNavigation } from "@/config/navigation";
-import { cn } from "@/utils/cn";
 
-function Logo() {
-  return (
-    <div className="flex items-center gap-3">
-      <div className="relative grid size-11 shrink-0 place-items-center rounded-[15px] bg-[var(--sidebar-active)] text-white shadow-lg shadow-violet-950/25">
-        <Gem size={22} strokeWidth={2.3} />
-        <span className="absolute -right-1 -top-1 size-3 rounded-full border-2 border-[var(--sidebar)] bg-[var(--accent)]" />
-      </div>
-      <div className="min-w-0">
-        <p className="m-0 truncate text-[15px] font-bold tracking-[-0.02em] text-[var(--sidebar-text)]">Joota Chupai</p>
-        <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--sidebar-muted)]">Event marketplace</p>
-      </div>
-    </div>
-  );
+export const SIDEBAR_WIDTH = 272;
+
+function isActive(pathname, href) {
+  if (href === "/") return pathname === "/";
+  return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-function NavItem({ item }) {
-  const Icon = item.icon;
+export default function Sidebar() {
+  const pathname = usePathname() || "/";
+
+  const bookingsBadge = useSelector((s) => s.bookings.items.filter((b) => b.status === "Pending").length);
+  const messagesBadge = useSelector((s) => s.messages.conversations.reduce((a, c) => a + (c.unread || 0), 0));
+  const vendorsBadge = useSelector((s) => s.vendors.items.filter((v) => v.status === "Pending").length);
+  const badgeFor = (href) =>
+    ({ "/bookings": bookingsBadge, "/messages": messagesBadge, "/vendors": vendorsBadge }[href]) || 0;
+
+  const renderItem = (item) => {
+    const Icon = item.icon;
+    const active = isActive(pathname, item.href);
+    const badge = badgeFor(item.href);
+    return (
+      <ListItemButton
+        key={item.label}
+        component={Link}
+        href={item.href}
+        selected={active}
+        sx={{ py: 1 }}
+      >
+        <ListItemIcon sx={{ minWidth: 38, color: "text.secondary" }}>
+          <Icon fontSize="small" />
+        </ListItemIcon>
+        <ListItemText
+          primary={item.label}
+          slotProps={{ primary: { fontSize: 14, fontWeight: 600 } }}
+        />
+        {badge > 0 ? (
+          <Chip
+            label={badge}
+            size="small"
+            color={active ? "primary" : "default"}
+            sx={{ height: 20, fontSize: 11 }}
+          />
+        ) : null}
+      </ListItemButton>
+    );
+  };
 
   return (
-    <button
-      type="button"
-      className={cn(
-        "group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[13px] font-medium transition-colors",
-        item.active
-          ? "bg-[var(--sidebar-active)] text-white shadow-lg shadow-violet-950/20"
-          : "text-[var(--sidebar-muted)] hover:bg-[var(--sidebar-surface)] hover:text-[var(--sidebar-text)]",
-      )}
+    <Box
+      sx={{
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        bgcolor: "background.paper",
+        borderRight: "1px solid",
+        borderColor: "divider",
+      }}
     >
-      <Icon size={18} strokeWidth={item.active ? 2.3 : 1.9} />
-      <span className="flex-1">{item.label}</span>
-      {item.badge && (
-        <span className={cn(
-          "rounded-full px-2 py-0.5 text-[10px] font-bold",
-          item.active ? "bg-white/18 text-white" : "bg-[var(--sidebar-surface)] text-[var(--sidebar-text)]",
-        )}>
-          {item.badge}
-        </span>
-      )}
-    </button>
-  );
-}
+      <Stack direction="row" spacing={1.5} sx={{ alignItems: "center", px: 3, py: 2.5 }}>
+        <Avatar
+          variant="rounded"
+          sx={{ bgcolor: "primary.main", width: 40, height: 40, borderRadius: 2 }}
+        >
+          <CelebrationRoundedIcon fontSize="small" />
+        </Avatar>
+        <Box>
+          <Typography variant="subtitle1" fontWeight={800} sx={{ lineHeight: 1.1 }}>
+            Joota Chupai
+          </Typography>
+          <Typography variant="caption" color="text.secondary" letterSpacing="0.14em">
+            ADMIN SUITE
+          </Typography>
+        </Box>
+      </Stack>
 
-export default function Sidebar({ open, onClose }) {
-  return (
-    <>
-      <button
-        type="button"
-        aria-label="Close navigation"
-        onClick={onClose}
-        className={cn(
-          "fixed inset-0 z-40 bg-[var(--overlay)] backdrop-blur-[2px] transition-opacity lg:hidden",
-          open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0",
-        )}
-      />
-      <aside className={cn(
-        "sidebar-shadow fixed inset-y-0 left-0 z-50 flex w-[272px] flex-col overflow-y-auto border-r border-[var(--sidebar-border)] bg-[var(--sidebar)] px-4 py-5 transition-transform duration-300 lg:sticky lg:top-0 lg:h-screen lg:translate-x-0",
-        open ? "translate-x-0" : "-translate-x-full",
-      )}>
-        <div className="flex items-center justify-between px-2">
-          <Logo />
-          <button type="button" aria-label="Close menu" onClick={onClose} className="grid size-9 place-items-center rounded-lg text-[var(--sidebar-muted)] hover:bg-[var(--sidebar-surface)] hover:text-white lg:hidden">
-            <X size={19} />
-          </button>
-        </div>
+      <Box sx={{ flex: 1, overflowY: "auto", px: 2, py: 1 }}>
+        {navigationGroups.map((group) => (
+          <Box key={group.label} sx={{ mb: 2 }}>
+            <Typography
+              variant="overline"
+              color="text.secondary"
+              sx={{ px: 1.5, display: "block", fontSize: 11 }}
+            >
+              {group.label}
+            </Typography>
+            <List disablePadding>{group.items.map(renderItem)}</List>
+          </Box>
+        ))}
+      </Box>
 
-        <nav className="mt-8 flex-1 space-y-6" aria-label="Admin navigation">
-          {navigationGroups.map((group) => (
-            <div key={group.label}>
-              <p className="mb-2 px-3 text-[9px] font-bold uppercase tracking-[0.2em] text-[var(--sidebar-muted)]/65">{group.label}</p>
-              <div className="space-y-1">
-                {group.items.map((item) => <NavItem key={item.label} item={item} />)}
-              </div>
-            </div>
-          ))}
-        </nav>
+      <Box sx={{ px: 2, pb: 1 }}>
+        <List disablePadding>{secondaryNavigation.map(renderItem)}</List>
+      </Box>
 
-        <div className="mt-6 rounded-2xl border border-white/8 bg-[var(--sidebar-surface)] p-4">
-          <div className="mb-3 grid size-8 place-items-center rounded-lg bg-[var(--secondary)]/15 text-[var(--secondary)]">
-            <Sparkles size={17} />
-          </div>
-          <p className="m-0 text-xs font-semibold text-[var(--sidebar-text)]">Make every event count</p>
-          <p className="mb-3 mt-1 text-[10px] leading-4 text-[var(--sidebar-muted)]">Your marketplace is growing beautifully.</p>
-          <button type="button" className="flex items-center gap-1.5 text-[10px] font-bold text-[var(--accent)]">
-            View insights <ArrowUpRight size={13} />
-          </button>
-        </div>
-
-        <div className="mt-4 space-y-1 border-t border-[var(--sidebar-border)] pt-4">
-          {secondaryNavigation.map((item) => <NavItem key={item.label} item={item} />)}
-        </div>
-      </aside>
-    </>
+      <Box sx={{ p: 2 }}>
+        <Box
+          sx={{
+            p: 2,
+            borderRadius: 3,
+            background: "linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%)",
+            color: "#fff",
+          }}
+        >
+          <Typography variant="subtitle2" fontWeight={700}>
+            Season peak is live
+          </Typography>
+          <Typography variant="caption" sx={{ opacity: 0.85, display: "block", mt: 0.5 }}>
+            Wedding-season traffic is up 34%. Review featured slots.
+          </Typography>
+        </Box>
+      </Box>
+    </Box>
   );
 }

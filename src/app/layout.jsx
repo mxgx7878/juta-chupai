@@ -1,9 +1,9 @@
+import "@fontsource-variable/inter";
 import "./globals.css";
-import "@/theme/tokens.css";
 import Providers from "./providers";
 
 export const metadata = {
-  title: "Joota Chupai Admin",
+  title: "Joota Chupai — Admin",
   description: "Event marketplace administration dashboard",
 };
 

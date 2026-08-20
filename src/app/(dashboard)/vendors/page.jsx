@@ -34,7 +34,7 @@ import RowMenu from "@/components/ui/RowMenu";
 import VendorFormDialog from "@/components/vendor/VendorFormDialog";
 import { vendorsActions } from "@/store";
 import { notify } from "@/store/uiSlice";
-import { slugify } from "@/utils/slug";
+import { slugify, uniqueSlug } from "@/utils/slug";
 import { CategoryLabel } from "@/components/ui/CategoryIcon";
 
 const AV = ["#4f46e5", "#0ea5a4", "#f59e0b", "#7c3aed", "#ec4899", "#2f6fed"];
@@ -64,16 +64,14 @@ function VendorsContent() {
 
   const submit = (data) => {
     if (dialog.vendor) {
-      if (dialog.vendor.name !== data.name) {
-        dispatch(vendorsActions.remove(dialog.vendor.name));
-        dispatch(vendorsActions.add({ ...dialog.vendor, ...data }));
-      } else {
-        dispatch(vendorsActions.update({ ...dialog.vendor, ...data }));
-      }
+      // id is stable, so a rename is just an update.
+      dispatch(vendorsActions.update({ ...dialog.vendor, ...data }));
       dispatch(notify("Vendor updated"));
     } else {
+      const id = uniqueSlug(data.name, items.map((v) => v.id));
       dispatch(
         vendorsActions.add({
+          id,
           ...data,
           rating: 0,
           reviews: 0,
@@ -131,14 +129,14 @@ function VendorsContent() {
             </TableHead>
             <TableBody>
               {rows.map((v, i) => (
-                <TableRow key={v.name} hover>
+                <TableRow key={v.id} hover>
                   <TableCell>
                     <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
                       <Avatar variant="rounded" sx={{ bgcolor: AV[i % AV.length], borderRadius: 2, width: 38, height: 38, fontSize: 14 }}>
                         {initials(v.name)}
                       </Avatar>
                       <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
-                        <MuiLink component={Link} href={`/vendors/${slugify(v.name)}`} underline="hover" sx={{ fontWeight: 700, color: "text.primary" }}>
+                        <MuiLink component={Link} href={`/vendors/${v.id}`} underline="hover" sx={{ fontWeight: 700, color: "text.primary" }}>
                           {v.name}
                         </MuiLink>
                         {v.verified && (
@@ -169,19 +167,19 @@ function VendorsContent() {
                     <Stack direction="row" spacing={1} sx={{ justifyContent: "flex-end", alignItems: "center" }}>
                       {v.status === "Pending" && (
                         <>
-                          <Button size="small" variant="contained" color="success" onClick={() => { dispatch(vendorsActions.setStatus({ id: v.name, status: "Approved" })); dispatch(notify(`${v.name} approved`)); }}>
+                          <Button size="small" variant="contained" color="success" onClick={() => { dispatch(vendorsActions.setStatus({ id: v.id, status: "Approved" })); dispatch(notify(`${v.name} approved`)); }}>
                             Approve
                           </Button>
-                          <Button size="small" variant="outlined" color="inherit" onClick={() => { dispatch(vendorsActions.setStatus({ id: v.name, status: "Rejected" })); dispatch(notify({ message: `${v.name} rejected`, severity: "error" })); }}>
+                          <Button size="small" variant="outlined" color="inherit" onClick={() => { dispatch(vendorsActions.setStatus({ id: v.id, status: "Rejected" })); dispatch(notify({ message: `${v.name} rejected`, severity: "error" })); }}>
                             Reject
                           </Button>
                         </>
                       )}
                       <RowMenu
                         actions={[
-                          { label: "View profile", icon: <VisibilityRoundedIcon fontSize="small" />, onClick: () => { window.location.href = `/vendors/${slugify(v.name)}`; } },
+                          { label: "View profile", icon: <VisibilityRoundedIcon fontSize="small" />, onClick: () => { window.location.href = `/vendors/${v.id}`; } },
                           { label: "Edit", icon: <EditRoundedIcon fontSize="small" />, onClick: () => setDialog({ open: true, vendor: v }) },
-                          { label: "Delete", icon: <DeleteOutlineRoundedIcon fontSize="small" />, danger: true, onClick: () => { dispatch(vendorsActions.remove(v.name)); dispatch(notify({ message: "Vendor deleted", severity: "info" })); } },
+                          { label: "Delete", icon: <DeleteOutlineRoundedIcon fontSize="small" />, danger: true, onClick: () => { dispatch(vendorsActions.remove(v.id)); dispatch(notify({ message: "Vendor deleted", severity: "info" })); } },
                         ]}
                       />
                     </Stack>

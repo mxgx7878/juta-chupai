@@ -1,5 +1,4 @@
 import SpaceDashboardRoundedIcon from "@mui/icons-material/SpaceDashboardRounded";
-import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
 import ChatRoundedIcon from "@mui/icons-material/ChatRounded";
 import GroupRoundedIcon from "@mui/icons-material/GroupRounded";
 import StorefrontRoundedIcon from "@mui/icons-material/StorefrontRounded";
@@ -11,13 +10,14 @@ import NotificationsRoundedIcon from "@mui/icons-material/NotificationsRounded";
 import InsightsRoundedIcon from "@mui/icons-material/InsightsRounded";
 import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
 import CalculateRoundedIcon from "@mui/icons-material/CalculateRounded";
+import QuestionAnswerRoundedIcon from "@mui/icons-material/QuestionAnswerRounded";
 
 export const navigationGroups = [
   {
     label: "Workspace",
     items: [
       { label: "Overview", icon: SpaceDashboardRoundedIcon, href: "/" },
-      { label: "Bookings", icon: CalendarMonthRoundedIcon, href: "/bookings" },
+      { label: "Inquiries", icon: QuestionAnswerRoundedIcon, href: "/inquiries" },
       { label: "Calculator", icon: CalculateRoundedIcon, href: "/calculator" },
       { label: "Messages", icon: ChatRoundedIcon, href: "/messages" },
     ],

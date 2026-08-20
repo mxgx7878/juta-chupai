@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
@@ -18,12 +19,14 @@ import { exportCsv } from "@/utils/exportCsv";
 
 import MetricCard from "@/components/dashboard/MetricCard";
 import SectionCard from "@/components/dashboard/SectionCard";
-import BookingsChart from "@/components/dashboard/BookingsChart";
 import CategoryPie from "@/components/dashboard/CategoryPie";
-import RecentBookingsTable from "@/components/dashboard/RecentBookingsTable";
 import VendorApprovals from "@/components/dashboard/VendorApprovals";
 import ActivityFeed from "@/components/dashboard/ActivityFeed";
-import { metrics } from "@/data/dashboard";
+import RecentInquiries from "@/components/dashboard/RecentInquiries";
+import Inventory2RoundedIcon from "@mui/icons-material/Inventory2Rounded";
+import QuestionAnswerRoundedIcon from "@mui/icons-material/QuestionAnswerRounded";
+import StorefrontRoundedIcon from "@mui/icons-material/StorefrontRounded";
+import PendingActionsRoundedIcon from "@mui/icons-material/PendingActionsRounded";
 
 const PERIODS = ["This week", "This month", "This quarter", "This year"];
 
@@ -31,6 +34,23 @@ export default function DashboardPage() {
   const router = useRouter();
   const [period, setPeriod] = useState("This month");
   const [periodAnchor, setPeriodAnchor] = useState(null);
+
+  const listings = useSelector((s) => s.listings.items);
+  const inquiries = useSelector((s) => s.inquiries.items);
+  const vendors = useSelector((s) => s.vendors.items);
+
+  const metrics = useMemo(() => {
+    const published = listings.filter((l) => l.status === "Published").length;
+    const newInq = inquiries.filter((q) => q.status === "New").length;
+    const activeVendors = vendors.filter((v) => v.status === "Approved").length;
+    const pending = vendors.filter((v) => v.status === "Pending").length;
+    return [
+      { label: "Published listings", value: String(published), change: `${listings.length} total`, up: true, note: "live in discovery", icon: Inventory2RoundedIcon, color: "primary" },
+      { label: "New inquiries", value: String(newInq), change: `${inquiries.length} total`, up: true, note: "awaiting response", icon: QuestionAnswerRoundedIcon, color: "secondary" },
+      { label: "Active vendors", value: String(activeVendors), change: `+${activeVendors}`, up: true, note: "approved & listed", icon: StorefrontRoundedIcon, color: "success" },
+      { label: "Pending approvals", value: String(pending), change: pending ? `${pending} to review` : "all clear", up: pending === 0, note: "needs review", icon: PendingActionsRoundedIcon, color: "warning" },
+    ];
+  }, [listings, inquiries, vendors]);
 
   const exportReport = () =>
     exportCsv(
@@ -109,7 +129,7 @@ export default function DashboardPage() {
               Good morning, Ayesha
             </Typography>
             <Typography variant="body2" sx={{ mt: 1, opacity: 0.85 }}>
-              Bookings are up 21.6% this month across 14 cities. You have 26 vendors
+              Listings are up 21.6% this month across 14 cities. You have 26 vendors
               and 3 reported reviews waiting for review.
             </Typography>
           </Box>
@@ -151,48 +171,23 @@ export default function DashboardPage() {
         ))}
       </Box>
 
-      {/* Charts row */}
+      {/* Category mix + activity */}
       <Box
         sx={{
           display: "grid",
           gap: 3,
-          gridTemplateColumns: { xs: "1fr", lg: "2fr 1fr" },
+          gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr" },
         }}
       >
-        <SectionCard
-          title="Bookings & quotes"
-          subtitle="Confirmed bookings vs. quote requests over the year"
-          action={
-            <Stack direction="row" spacing={2}>
-              <Legend color="#4f46e5" label="Bookings" />
-              <Legend color="#0ea5a4" label="Quotes" />
-            </Stack>
-          }
-        >
-          <BookingsChart />
-        </SectionCard>
-        <SectionCard title="Category mix" subtitle="Share of bookings by service">
+        <SectionCard title="Category mix" subtitle="Share of listings by category">
           <CategoryPie />
         </SectionCard>
-      </Box>
-
-      {/* Table + activity */}
-      <Box
-        sx={{
-          display: "grid",
-          gap: 3,
-          gridTemplateColumns: { xs: "1fr", lg: "2fr 1fr" },
-        }}
-      >
         <SectionCard
-          title="Recent bookings"
-          subtitle="Latest activity across the marketplace"
-          action={<Button size="small" color="inherit" onClick={() => router.push("/bookings")}>View all</Button>}
+          title="Recent inquiries"
+          subtitle="Latest customer requests"
+          action={<Button size="small" color="inherit" onClick={() => router.push("/inquiries")}>View all</Button>}
         >
-          <RecentBookingsTable />
-        </SectionCard>
-        <SectionCard title="Activity" subtitle="Live platform events">
-          <ActivityFeed />
+          <RecentInquiries />
         </SectionCard>
       </Box>
 
@@ -211,18 +206,10 @@ export default function DashboardPage() {
         >
           <VendorApprovals />
         </SectionCard>
+        <SectionCard title="Activity" subtitle="Live platform events">
+          <ActivityFeed />
+        </SectionCard>
       </Box>
-    </Stack>
-  );
-}
-
-function Legend({ color, label }) {
-  return (
-    <Stack direction="row" spacing={0.75} sx={{ alignItems: "center" }}>
-      <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: color }} />
-      <Typography variant="caption" color="text.secondary" fontWeight={600}>
-        {label}
-      </Typography>
     </Stack>
   );
 }

@@ -30,10 +30,10 @@ function entity(name, initial, idKey) {
 }
 
 export const customersSlice = entity("customers", data.customers, "email");
-export const vendorsSlice = entity("vendors", data.vendors, "name");
-export const listingsSlice = entity("listings", data.listings, "title");
+export const vendorsSlice = entity("vendors", data.vendors, "id");
+export const listingsSlice = entity("listings", data.listings, "id");
+export const inquiriesSlice = entity("inquiries", data.inquiries, "id");
 export const categoriesSlice = entity("categories", data.categories, "name");
 export const citiesSlice = entity("cities", data.cities, "name");
 export const bannersSlice = entity("banners", data.banners, "title");
-export const bookingsSlice = entity("bookings", data.bookings, "id");
 export const notificationsSlice = entity("notifications", data.notificationsSent, "title");

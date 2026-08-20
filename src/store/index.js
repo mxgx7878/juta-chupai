@@ -3,9 +3,9 @@ import {
   customersSlice,
   vendorsSlice,
   listingsSlice,
+  inquiriesSlice,
   citiesSlice,
   bannersSlice,
-  bookingsSlice,
   notificationsSlice,
 } from "./entities";
 import categories, { categoriesActions as catActions } from "./categoriesSlice";
@@ -17,10 +17,10 @@ export const store = configureStore({
     customers: customersSlice.reducer,
     vendors: vendorsSlice.reducer,
     listings: listingsSlice.reducer,
+    inquiries: inquiriesSlice.reducer,
     categories,
     cities: citiesSlice.reducer,
     banners: bannersSlice.reducer,
-    bookings: bookingsSlice.reducer,
     notifications: notificationsSlice.reducer,
     messages,
     ui,
@@ -30,8 +30,8 @@ export const store = configureStore({
 export const customersActions = customersSlice.actions;
 export const vendorsActions = vendorsSlice.actions;
 export const listingsActions = listingsSlice.actions;
+export const inquiriesActions = inquiriesSlice.actions;
 export const citiesActions = citiesSlice.actions;
 export const bannersActions = bannersSlice.actions;
-export const bookingsActions = bookingsSlice.actions;
 export const notificationsActions = notificationsSlice.actions;
 export const categoriesActions = catActions;

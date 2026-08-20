@@ -23,7 +23,7 @@ export const metrics = [
     color: "secondary",
   },
   {
-    label: "Gross bookings",
+    label: "Gross sales",
     value: "PKR 8.4M",
     change: "+21.6%",
     up: true,
@@ -46,8 +46,6 @@ export const months = [
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
 ];
-export const bookingsSeries = [210, 260, 240, 320, 300, 410, 380, 470, 440, 540, 610, 720];
-export const quotesSeries = [140, 180, 200, 230, 260, 300, 320, 360, 380, 420, 470, 520];
 
 export const categoryMix = [
   { label: "Venues", value: 32 },
@@ -64,17 +62,9 @@ export const pendingVendors = [
   { name: "Saffron Table Co.", category: "Catering", city: "Multan", initials: "ST", rating: 4.6, submitted: "1d ago" },
 ];
 
-export const recentBookings = [
-  { id: "JC-2048", event: "Mehndi Night", customer: "Ayesha Khan", vendor: "Gulmohar Banquet", date: "Aug 24", amount: "PKR 420,000", status: "Confirmed" },
-  { id: "JC-2047", event: "Corporate Gala", customer: "Zeeshan Ali", vendor: "The Grand Marquee", date: "Aug 22", amount: "PKR 1,150,000", status: "Pending" },
-  { id: "JC-2046", event: "Birthday Soirée", customer: "Hina Raza", vendor: "Frame Story Films", date: "Aug 20", amount: "PKR 95,000", status: "Confirmed" },
-  { id: "JC-2045", event: "Nikkah Ceremony", customer: "Bilal Ahmed", vendor: "Saffron Table Co.", date: "Aug 19", amount: "PKR 680,000", status: "Quote sent" },
-  { id: "JC-2044", event: "Engagement", customer: "Mariam Yousuf", vendor: "The Floral Chapter", date: "Aug 18", amount: "PKR 240,000", status: "Declined" },
-];
-
 export const activityFeed = [
   { title: "New vendor application", detail: "Velvet Table Co. applied for approval", time: "4 min", color: "primary" },
-  { title: "Booking confirmed", detail: "Booking #JC-2048 accepted by Gulmohar Banquet", time: "18 min", color: "success" },
+  { title: "Inquiry confirmed", detail: "Inquiry #JC-2048 accepted by Gulmohar Banquet", time: "18 min", color: "success" },
   { title: "Review reported", detail: "A customer review needs moderation", time: "42 min", color: "error" },
   { title: "Featured listing purchased", detail: "Frame Story Films upgraded to Premium", time: "1 hr", color: "warning" },
   { title: "New city enabled", detail: "Multan is now live in discovery", time: "2 hr", color: "info" },

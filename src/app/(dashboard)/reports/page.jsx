@@ -22,7 +22,7 @@ export default function ReportsPage() {
       <PageHeader
         overline="Engagement"
         title="Reports"
-        subtitle="Revenue, bookings and marketplace performance"
+        subtitle="Revenue, listings and marketplace performance"
         action={
           <Button
             variant="contained"
@@ -55,12 +55,12 @@ export default function ReportsPage() {
             />
           </SectionCard>
 
-          <SectionCard title="Category mix" subtitle="Share of bookings">
+          <SectionCard title="Category mix" subtitle="Share of listings">
             <CategoryPie />
           </SectionCard>
         </Box>
 
-        <SectionCard title="Bookings by city" subtitle="Top performing cities this month">
+        <SectionCard title="Inquiries by city" subtitle="Top performing cities this month">
           <BarChart
             height={300}
             hideLegend

@@ -12,6 +12,17 @@ import CheckroomRoundedIcon from "@mui/icons-material/CheckroomRounded";
 import NightlifeRoundedIcon from "@mui/icons-material/NightlifeRounded";
 import CardGiftcardRoundedIcon from "@mui/icons-material/CardGiftcardRounded";
 import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
+// added for the expanded category tree
+import ShoppingBagRoundedIcon from "@mui/icons-material/ShoppingBagRounded";
+import MailRoundedIcon from "@mui/icons-material/MailRounded";
+import EventNoteRoundedIcon from "@mui/icons-material/EventNoteRounded";
+import ShoppingCartRoundedIcon from "@mui/icons-material/ShoppingCartRounded";
+import MosqueRoundedIcon from "@mui/icons-material/MosqueRounded";
+import FlightRoundedIcon from "@mui/icons-material/FlightRounded";
+import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
+import WeekendRoundedIcon from "@mui/icons-material/WeekendRounded";
+import LuggageRoundedIcon from "@mui/icons-material/LuggageRounded";
+import ContentCutRoundedIcon from "@mui/icons-material/ContentCutRounded";
 
 /* Serializable icon registry — categories store an `iconKey` (string) so they
    can live in Redux and be created at runtime; we resolve to a component here. */
@@ -30,6 +41,17 @@ export const ICON_REGISTRY = {
   nightlife: NightlifeRoundedIcon,
   gift: CardGiftcardRoundedIcon,
   favorite: FavoriteRoundedIcon,
+  // expanded tree
+  bag: ShoppingBagRoundedIcon,
+  invite: MailRoundedIcon,
+  planner: EventNoteRoundedIcon,
+  shopping: ShoppingCartRoundedIcon,
+  mosque: MosqueRoundedIcon,
+  travel: FlightRoundedIcon,
+  home: HomeRoundedIcon,
+  furniture: WeekendRoundedIcon,
+  luggage: LuggageRoundedIcon,
+  tailoring: ContentCutRoundedIcon,
 };
 
 export const ICON_OPTIONS = Object.keys(ICON_REGISTRY);

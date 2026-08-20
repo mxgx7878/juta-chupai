@@ -27,6 +27,12 @@ import { notify } from "@/store/uiSlice";
 export default function CitiesPage() {
   const items = useSelector((s) => s.cities.items);
   const dispatch = useDispatch();
+  const listings = useSelector((s) => s.listings.items);
+  const vendors = useSelector((s) => s.vendors.items);
+  const listingsInCity = (name) => {
+    const vids = new Set(vendors.filter((v) => v.city === name).map((v) => v.id));
+    return listings.filter((l) => l.city === name || vids.has(l.vendorId)).length;
+  };
   const [open, setOpen] = useState(false);
 
   return (
@@ -49,7 +55,7 @@ export default function CitiesPage() {
               <TableRow>
                 <TableCell>City</TableCell>
                 <TableCell align="center">Vendors</TableCell>
-                <TableCell align="center">Bookings</TableCell>
+                <TableCell align="center">Listings</TableCell>
                 <TableCell align="center">Enabled</TableCell>
                 <TableCell align="right" />
               </TableRow>
@@ -68,7 +74,7 @@ export default function CitiesPage() {
                     </Stack>
                   </TableCell>
                   <TableCell align="center">{c.vendors}</TableCell>
-                  <TableCell align="center">{c.bookings}</TableCell>
+                  <TableCell align="center">{listingsInCity(c.name)}</TableCell>
                   <TableCell align="center">
                     <Switch
                       checked={c.enabled}
@@ -103,7 +109,6 @@ export default function CitiesPage() {
         fields={[
           { name: "name", label: "City name", required: true, full: true },
           { name: "vendors", label: "Vendors", type: "number", defaultValue: 0 },
-          { name: "bookings", label: "Bookings", type: "number", defaultValue: 0 },
         ]}
         onClose={() => setOpen(false)}
         onSubmit={(v) => {
@@ -111,7 +116,7 @@ export default function CitiesPage() {
             citiesActions.add({
               name: v.name,
               vendors: Number(v.vendors) || 0,
-              bookings: Number(v.bookings) || 0,
+              bookings: 0,
               enabled: true,
             }),
           );

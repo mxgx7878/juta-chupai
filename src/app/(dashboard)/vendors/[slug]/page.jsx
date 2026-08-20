@@ -35,10 +35,12 @@ import CategoryIcon from "@/components/ui/CategoryIcon";
 import VendorFormDialog from "@/components/vendor/VendorFormDialog";
 import { vendorsActions } from "@/store";
 import { notify } from "@/store/uiSlice";
-import { slugify } from "@/utils/slug";
 import { categoryMeta } from "@/config/vendorCategories";
+import { priceLabel, typeChips } from "@/utils/listing";
 
 const GRAD = ["linear-gradient(135deg,#4f46e5,#7c3aed)", "linear-gradient(135deg,#0ea5a4,#2f6fed)", "linear-gradient(135deg,#f59e0b,#ec4899)", "linear-gradient(135deg,#7c3aed,#ec4899)"];
+const TYPE_COLORS = { rent: { bg: "#e0edff", fg: "#1d4ed8" }, purchase: { bg: "#dcfce7", fg: "#15803d" }, service: { bg: "#ede9fe", fg: "#6d28d9" } };
+
 
 function Stat({ label, value }) {
   return (
@@ -57,7 +59,8 @@ export default function VendorDetailPage() {
   const { slug } = useParams();
   const router = useRouter();
   const dispatch = useDispatch();
-  const vendor = useSelector((s) => s.vendors.items.find((v) => slugify(v.name) === slug));
+  const vendor = useSelector((s) => s.vendors.items.find((v) => v.id === slug));
+  const vendorListings = useSelector((s) => s.listings.items.filter((l) => l.vendorId === slug));
   const [edit, setEdit] = useState(false);
 
   if (!vendor) {
@@ -89,11 +92,11 @@ export default function VendorDetailPage() {
             Edit
           </Button>
           {vendor.status === "Approved" ? (
-            <Button variant="outlined" color="error" startIcon={<BlockRoundedIcon />} onClick={() => { dispatch(vendorsActions.setStatus({ id: vendor.name, status: "Rejected" })); dispatch(notify({ message: "Vendor suspended", severity: "warning" })); }}>
+            <Button variant="outlined" color="error" startIcon={<BlockRoundedIcon />} onClick={() => { dispatch(vendorsActions.setStatus({ id: vendor.id, status: "Rejected" })); dispatch(notify({ message: "Vendor suspended", severity: "warning" })); }}>
               Suspend
             </Button>
           ) : (
-            <Button variant="contained" color="success" startIcon={<CheckRoundedIcon />} onClick={() => { dispatch(vendorsActions.setStatus({ id: vendor.name, status: "Approved" })); dispatch(notify("Vendor approved")); }}>
+            <Button variant="contained" color="success" startIcon={<CheckRoundedIcon />} onClick={() => { dispatch(vendorsActions.setStatus({ id: vendor.id, status: "Approved" })); dispatch(notify("Vendor approved")); }}>
               Approve
             </Button>
           )}
@@ -130,7 +133,7 @@ export default function VendorDetailPage() {
           <Stack direction="row" spacing={1.5} sx={{ mt: 3 }}>
             <Stat label="Rating" value={vendor.rating || "—"} />
             <Stat label="Reviews" value={vendor.reviews ?? 0} />
-            <Stat label="Bookings" value={vendor.bookings ?? 0} />
+            <Stat label="Listings" value={vendorListings.length} />
             <Stat label="Experience" value={vendor.experience || "—"} />
           </Stack>
         </Box>
@@ -138,6 +141,30 @@ export default function VendorDetailPage() {
 
       <Box sx={{ display: "grid", gap: 3, gridTemplateColumns: { xs: "1fr", lg: "2fr 1fr" } }}>
         <Stack spacing={3}>
+          {/* Listings */}
+          <Card sx={{ p: { xs: 2, md: 3 } }}>
+            <Typography variant="h6" fontWeight={700} sx={{ mb: 1.5 }}>
+              Listings ({vendorListings.length})
+            </Typography>
+            <Stack spacing={1.25}>
+              {vendorListings.map((l) => (
+                <Stack key={l.id} direction="row" spacing={1.5} sx={{ alignItems: "center", p: 1.25, borderRadius: 2, border: "1px solid", borderColor: "divider" }}>
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Typography variant="subtitle2" fontWeight={700} noWrap>{l.title}</Typography>
+                    <Stack direction="row" spacing={0.5} sx={{ mt: 0.5, flexWrap: "wrap", gap: 0.5 }}>
+                      {typeChips(l).map((c) => (
+                        <Chip key={c.type} label={c.label} size="small" sx={{ fontWeight: 700, bgcolor: TYPE_COLORS[c.type]?.bg, color: TYPE_COLORS[c.type]?.fg }} />
+                      ))}
+                    </Stack>
+                  </Box>
+                  <Typography variant="body2" fontWeight={800} sx={{ color: "primary.main", whiteSpace: "nowrap" }}>{priceLabel(l)}</Typography>
+                  <StatusChip status={l.status} />
+                </Stack>
+              ))}
+              {vendorListings.length === 0 && <Typography color="text.secondary" variant="body2">No listings yet.</Typography>}
+            </Stack>
+          </Card>
+
           {/* Services */}
           <Card sx={{ p: { xs: 2, md: 3 } }}>
             <Typography variant="h6" fontWeight={700} sx={{ mb: 1.5 }}>
@@ -273,13 +300,7 @@ export default function VendorDetailPage() {
         vendor={vendor}
         onClose={() => setEdit(false)}
         onSubmit={(data) => {
-          if (vendor.name !== data.name) {
-            dispatch(vendorsActions.remove(vendor.name));
-            dispatch(vendorsActions.add({ ...vendor, ...data }));
-            router.replace(`/vendors/${slugify(data.name)}`);
-          } else {
-            dispatch(vendorsActions.update({ ...vendor, ...data }));
-          }
+          dispatch(vendorsActions.update({ ...vendor, ...data }));
           dispatch(notify("Vendor updated"));
         }}
       />

@@ -258,3 +258,20 @@ export const inquiries = [
   { id: "inq-1013", listingId: "continental-fine-dining", vendorId: "velvet-table-co", type: "service", customerName: "Usman Tariq", customerEmail: "usman.t@email.com", customerCity: "Faisalabad", eventDate: "2026-11-08", message: "Plated dinner for 150, done — great service.", status: "Completed", createdAt: "2026-07-30" },
   { id: "inq-1014", listingId: "mehndi-night-glam", vendorId: "glam-squad-makeovers", type: "service", customerName: "Zeeshan Ali", customerEmail: "zeeshan@email.com", customerCity: "Karachi", eventDate: "2026-10-04", message: "Party makeup for 2 for mehndi.", status: "Rejected", createdAt: "2026-08-06" },
 ];
+
+
+export const calendarEntries = [
+  // Gulmohar Banquet — default login vendor (populated so the calendar isn't empty)
+  { id: "cal-2001", vendorId: "gulmohar-banquet", date: "2026-08-23", time: "7:00 PM", kind: "booking", title: "Ali–Sara Walima", customerName: "Ali Raza", note: "500 guests, main hall" },
+  { id: "cal-2002", vendorId: "gulmohar-banquet", date: "2026-08-23", time: "2:00 PM", kind: "hold", title: "Site visit — Khan family", customerName: "Imran Khan", note: "Tentative, confirm by Fri" },
+  { id: "cal-2003", vendorId: "gulmohar-banquet", date: "2026-08-28", time: "6:00 PM", kind: "booking", title: "Khan Mehndi", customerName: "Sadia Khan", note: "" },
+  { id: "cal-2004", vendorId: "gulmohar-banquet", date: "2026-09-05", time: "8:00 PM", kind: "booking", title: "Corporate dinner", customerName: "TechCorp", note: "AV setup needed" },
+  { id: "cal-2005", vendorId: "gulmohar-banquet", date: "2026-09-14", time: "", kind: "hold", title: "Tentative — Sept walima", customerName: "", note: "Awaiting advance" },
+  { id: "cal-2006", vendorId: "gulmohar-banquet", date: "2026-10-12", time: "7:30 PM", kind: "booking", title: "Malik Nikkah", customerName: "Bilal Malik", note: "" },
+  { id: "cal-2007", vendorId: "gulmohar-banquet", date: "2026-08-30", time: "", kind: "note", title: "Staff off — maintenance", customerName: "", note: "Deep clean" },
+
+  // Other vendors — linked to their confirmed inquiries
+  { id: "cal-2101", vendorId: "frame-story-films", date: "2026-10-05", time: "9:00 AM", kind: "booking", title: "Zeeshan wedding shoot", customerName: "Zeeshan Ali", note: "Full-day coverage", linkedInquiryId: "inq-1002" },
+  { id: "cal-2102", vendorId: "the-grand-marquee", date: "2026-11-08", time: "4:00 PM", kind: "booking", title: "Usman marquee", customerName: "Usman Tariq", note: "400 guests outdoor", linkedInquiryId: "inq-1007" },
+  { id: "cal-2103", vendorId: "the-floral-chapter", date: "2026-12-01", time: "3:00 PM", kind: "booking", title: "Bilal stage & florals", customerName: "Bilal Ahmed", note: "Match buffet booking", linkedInquiryId: "inq-1011" },
+];

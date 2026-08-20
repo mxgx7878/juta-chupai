@@ -33,9 +33,10 @@ const emptyPricing = () => ({
   service: { amount: "", unit: "per event" },
 });
 
-function blankForm(listing, vendors) {
+function blankForm(listing, vendors, lockVendorId) {
   // sensible default category when creating: from the chosen/first vendor
-  const firstVendor = vendors[0];
+  const lockedVendor = lockVendorId ? vendors.find((v) => v.id === lockVendorId) : null;
+  const firstVendor = lockedVendor || vendors[0];
   const defaultCat =
     (listing && getCategory(listing.categoryId)) ||
     getCategoryByName(firstVendor?.category) ||
@@ -49,7 +50,7 @@ function blankForm(listing, vendors) {
   }
 
   return {
-    vendorId: listing?.vendorId || firstVendor?.id || "",
+    vendorId: listing?.vendorId || lockVendorId || firstVendor?.id || "",
     title: listing?.title || "",
     categoryId: listing?.categoryId || defaultCat.id,
     subcategoryId: listing?.subcategoryId || "",
@@ -70,13 +71,15 @@ const SectionLabel = ({ children }) => (
   </Typography>
 );
 
-export default function ListingFormDialog({ open, listing, onClose, onSubmit }) {
+export default function ListingFormDialog({ open, listing, onClose, onSubmit, lockVendorId }) {
   const vendors = useSelector((s) => s.vendors.items);
-  const [f, setF] = useState(() => blankForm(listing, vendors));
+  const [f, setF] = useState(() => blankForm(listing, vendors, lockVendorId));
 
   useEffect(() => {
-    if (open) setF(blankForm(listing, vendors));
-  }, [open, listing, vendors]);
+    if (open) setF(blankForm(listing, vendors, lockVendorId));
+  }, [open, listing, vendors, lockVendorId]);
+
+  const lockedVendor = lockVendorId ? vendors.find((v) => v.id === lockVendorId) : null;
 
   const category = getCategory(f.categoryId) || CATEGORY_TREE[0];
   const allowedTypes = category.allowedTypes || [];
@@ -153,11 +156,15 @@ export default function ListingFormDialog({ open, listing, onClose, onSubmit }) 
         <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, mt: 1 }}>
           <TextField label="Title" size="small" required value={f.title} onChange={(e) => set("title", e.target.value)} sx={{ gridColumn: { sm: "1 / -1" } }} />
 
-          <TextField label="Vendor" size="small" select required value={f.vendorId} onChange={(e) => set("vendorId", e.target.value)}>
-            {vendors.map((v) => (
-              <MenuItem key={v.id} value={v.id}>{v.name}</MenuItem>
-            ))}
-          </TextField>
+          {lockedVendor ? (
+            <TextField label="Vendor" size="small" value={lockedVendor.name} disabled helperText="Your storefront" />
+          ) : (
+            <TextField label="Vendor" size="small" select required value={f.vendorId} onChange={(e) => set("vendorId", e.target.value)}>
+              {vendors.map((v) => (
+                <MenuItem key={v.id} value={v.id}>{v.name}</MenuItem>
+              ))}
+            </TextField>
+          )}
 
           <TextField label="City" size="small" select value={f.city} onChange={(e) => set("city", e.target.value)}>
             {CITY_OPTIONS.map((c) => <MenuItem key={c} value={c}>{c}</MenuItem>)}

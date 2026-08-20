@@ -33,6 +33,7 @@ export const customersSlice = entity("customers", data.customers, "email");
 export const vendorsSlice = entity("vendors", data.vendors, "id");
 export const listingsSlice = entity("listings", data.listings, "id");
 export const inquiriesSlice = entity("inquiries", data.inquiries, "id");
+export const calendarSlice = entity("calendar", data.calendarEntries, "id");
 export const categoriesSlice = entity("categories", data.categories, "name");
 export const citiesSlice = entity("cities", data.cities, "name");
 export const bannersSlice = entity("banners", data.banners, "title");

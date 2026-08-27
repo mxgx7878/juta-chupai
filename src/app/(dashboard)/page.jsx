@@ -22,11 +22,10 @@ import SectionCard from "@/components/dashboard/SectionCard";
 import CategoryPie from "@/components/dashboard/CategoryPie";
 import VendorApprovals from "@/components/dashboard/VendorApprovals";
 import ActivityFeed from "@/components/dashboard/ActivityFeed";
-import RecentInquiries from "@/components/dashboard/RecentInquiries";
-import Inventory2RoundedIcon from "@mui/icons-material/Inventory2Rounded";
-import QuestionAnswerRoundedIcon from "@mui/icons-material/QuestionAnswerRounded";
 import StorefrontRoundedIcon from "@mui/icons-material/StorefrontRounded";
 import PendingActionsRoundedIcon from "@mui/icons-material/PendingActionsRounded";
+import GroupRoundedIcon from "@mui/icons-material/GroupRounded";
+import CategoryRoundedIcon from "@mui/icons-material/CategoryRounded";
 
 const PERIODS = ["This week", "This month", "This quarter", "This year"];
 
@@ -35,22 +34,22 @@ export default function DashboardPage() {
   const [period, setPeriod] = useState("This month");
   const [periodAnchor, setPeriodAnchor] = useState(null);
 
-  const listings = useSelector((s) => s.listings.items);
-  const inquiries = useSelector((s) => s.inquiries.items);
   const vendors = useSelector((s) => s.vendors.items);
+  const customers = useSelector((s) => s.customers.items);
+  const categories = useSelector((s) => s.categories.items);
 
   const metrics = useMemo(() => {
-    const published = listings.filter((l) => l.status === "Published").length;
-    const newInq = inquiries.filter((q) => q.status === "New").length;
     const activeVendors = vendors.filter((v) => v.status === "Approved").length;
     const pending = vendors.filter((v) => v.status === "Pending").length;
+    const activeCustomers = customers.filter((c) => c.status === "Active").length;
+    const subCount = categories.reduce((a, c) => a + (c.subcategories?.length || 0), 0);
     return [
-      { label: "Published listings", value: String(published), change: `${listings.length} total`, up: true, note: "live in discovery", icon: Inventory2RoundedIcon, color: "primary" },
-      { label: "New inquiries", value: String(newInq), change: `${inquiries.length} total`, up: true, note: "awaiting response", icon: QuestionAnswerRoundedIcon, color: "secondary" },
-      { label: "Active vendors", value: String(activeVendors), change: `+${activeVendors}`, up: true, note: "approved & listed", icon: StorefrontRoundedIcon, color: "success" },
+      { label: "Active vendors", value: String(activeVendors), change: `${vendors.length} total`, up: true, note: "approved & listed", icon: StorefrontRoundedIcon, color: "primary" },
       { label: "Pending approvals", value: String(pending), change: pending ? `${pending} to review` : "all clear", up: pending === 0, note: "needs review", icon: PendingActionsRoundedIcon, color: "warning" },
+      { label: "Customers", value: String(activeCustomers), change: `${customers.length} total`, up: true, note: "registered & active", icon: GroupRoundedIcon, color: "success" },
+      { label: "Categories", value: String(categories.length), change: `${subCount} subcategories`, up: true, note: "in the tree", icon: CategoryRoundedIcon, color: "secondary" },
     ];
-  }, [listings, inquiries, vendors]);
+  }, [vendors, customers, categories]);
 
   const exportReport = () =>
     exportCsv(
@@ -129,8 +128,8 @@ export default function DashboardPage() {
               Good morning, Ayesha
             </Typography>
             <Typography variant="body2" sx={{ mt: 1, opacity: 0.85 }}>
-              Listings are up 21.6% this month across 14 cities. You have 26 vendors
-              and 3 reported reviews waiting for review.
+              Vendors, categories and cities are live. Listings, inquiries and bookings
+              are being rebuilt around the hall and catering verticals.
             </Typography>
           </Box>
           <Stack direction="row" spacing={1.5}>
@@ -171,25 +170,10 @@ export default function DashboardPage() {
         ))}
       </Box>
 
-      {/* Category mix + activity */}
-      <Box
-        sx={{
-          display: "grid",
-          gap: 3,
-          gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr" },
-        }}
-      >
-        <SectionCard title="Category mix" subtitle="Share of listings by category">
-          <CategoryPie />
-        </SectionCard>
-        <SectionCard
-          title="Recent inquiries"
-          subtitle="Latest customer requests"
-          action={<Button size="small" color="inherit" onClick={() => router.push("/inquiries")}>View all</Button>}
-        >
-          <RecentInquiries />
-        </SectionCard>
-      </Box>
+      {/* Category mix */}
+      <SectionCard title="Category mix" subtitle="Share of vendors by category">
+        <CategoryPie />
+      </SectionCard>
 
       {/* Approvals */}
       <Box

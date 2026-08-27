@@ -40,8 +40,8 @@ export const vendors = [
   },
   {
     id: "saffron-table-co", name: "Saffron Table Co.", owner: "Kashif Raza", category: "Catering & Food", city: "Multan",
-    rating: 4.6, reviews: 88, bookings: 74, status: "Pending", verified: false, premium: false, featured: false,
-    published: false, experience: "15 yrs", hours: "9:00 AM – 10:00 PM",
+    rating: 4.6, reviews: 88, bookings: 74, status: "Approved", verified: false, premium: false, featured: false,
+    published: true, experience: "15 yrs", hours: "9:00 AM – 10:00 PM",
     ig: "saffrontable", fb: "SaffronTableCo", web: "saffrontable.pk",
     services: ["Live BBQ", "Desi buffet", "Continental", "Dessert bar"],
     packages: [
@@ -100,8 +100,8 @@ export const vendors = [
   },
   {
     id: "velvet-table-co", name: "Velvet Table Co.", owner: "Sana Iqbal", category: "Catering & Food", city: "Lahore",
-    rating: 4.4, reviews: 12, bookings: 12, status: "Rejected", verified: false, premium: false, featured: false,
-    published: false, experience: "3 yrs", hours: "10:00 AM – 9:00 PM",
+    rating: 4.4, reviews: 12, bookings: 12, status: "Approved", verified: false, premium: false, featured: false,
+    published: true, experience: "3 yrs", hours: "10:00 AM – 9:00 PM",
     ig: "velvettable", fb: "VelvetTableCo", web: "velvettable.pk",
     services: ["Desi buffet", "Dessert bar"],
     packages: [{ name: "Standard", price: "PKR 900 / head", detail: "3 mains, 1 dessert" }],
@@ -125,53 +125,6 @@ export const vendors = [
     packages: [],
     gallery: [], attrs: {},
   },
-];
-
-export const listings = [
-  // Venues (rent)
-  { id: "royal-wedding-hall", vendorId: "gulmohar-banquet", title: "Royal Wedding Hall", categoryId: "venues", subcategoryId: "venues-marriage-halls", types: ["rent"], pricing: { rent: { amount: 350000, unit: "per event", deposit: 50000 } }, city: "Lahore", description: "Grand air-conditioned hall for up to 600 guests with in-house stage.", images: [], attrs: { capacity: 600, setting: "Both", parking: 120 }, status: "Published", featured: true },
-  { id: "grand-banquet-evening", vendorId: "gulmohar-banquet", title: "Grand Banquet Evening", categoryId: "venues", subcategoryId: "venues-banquet", types: ["rent"], pricing: { rent: { amount: 500000, unit: "per event", deposit: 80000 } }, city: "Lahore", description: "Premium banquet with catering and decor coordination.", images: [], attrs: { capacity: 450, setting: "Indoor" }, status: "Published", featured: false },
-  { id: "garden-marquee-setup", vendorId: "the-grand-marquee", title: "Garden Marquee Setup", categoryId: "venues", subcategoryId: "venues-marquee", types: ["rent"], pricing: { rent: { amount: 500000, unit: "per event", deposit: 80000 } }, city: "Karachi", description: "Outdoor marquee with lighting and seating for 500.", images: [], attrs: { capacity: 500, setting: "Outdoor" }, status: "Published", featured: true },
-
-  // Photography (service + rent)
-  { id: "full-day-photo-film", vendorId: "frame-story-films", title: "Full-Day Photo & Film", categoryId: "photography-video", subcategoryId: "photography-video-photographer", types: ["service"], pricing: { service: { amount: 160000, unit: "per event" } }, city: "Karachi", description: "Two shooters plus cinematic video, full-day coverage.", images: [], attrs: { coverage: "10 hrs", teamSize: 4 }, status: "Published", featured: true },
-  { id: "photo-booth-rental", vendorId: "frame-story-films", title: "Photo Booth Rental", categoryId: "photography-video", subcategoryId: "photography-video-photo-booth", types: ["rent"], pricing: { rent: { amount: 45000, unit: "per event", deposit: 10000 } }, city: "Karachi", description: "Self-serve photo booth with props and instant prints.", images: [], attrs: {}, status: "Published", featured: false },
-
-  // Catering (service)
-  { id: "premium-buffet-300", vendorId: "saffron-table-co", title: "Premium Buffet (300 pax)", categoryId: "catering", subcategoryId: "catering-catering", types: ["service"], pricing: { service: { amount: 420000, unit: "per event" } }, city: "Multan", description: "Desi + continental buffet with waitstaff for 300 guests.", images: [], attrs: { perHead: 1400, minGuests: 200 }, status: "Published", featured: false },
-  { id: "live-bbq-station", vendorId: "saffron-table-co", title: "Live BBQ Station", categoryId: "catering", subcategoryId: "catering-bbq", types: ["service"], pricing: { service: { amount: 90000, unit: "per event" } }, city: "Multan", description: "Live grill station with chefs.", images: [], attrs: { perHead: 600 }, status: "Draft", featured: false },
-  { id: "continental-fine-dining", vendorId: "velvet-table-co", title: "Continental Fine Dining", categoryId: "catering", subcategoryId: "catering-continental", types: ["service"], pricing: { service: { amount: 380000, unit: "per event" } }, city: "Lahore", description: "Plated continental menu with service staff.", images: [], attrs: { perHead: 1800 }, status: "Published", featured: false },
-
-  // Decoration (service + rent)
-  { id: "stage-floral-decor", vendorId: "the-floral-chapter", title: "Stage & Floral Décor", categoryId: "decoration", subcategoryId: "decoration-wedding-stage", types: ["service"], pricing: { service: { amount: 240000, unit: "per event" } }, city: "Islamabad", description: "Full stage design with fresh florals.", images: [], attrs: { teamSize: 8 }, status: "Published", featured: false },
-  { id: "fairy-light-package", vendorId: "the-floral-chapter", title: "Fairy Light Package", categoryId: "decoration", subcategoryId: "decoration-lighting", types: ["rent"], pricing: { rent: { amount: 35000, unit: "per event", deposit: 5000 } }, city: "Islamabad", description: "Ambient fairy lighting for venue and entrance.", images: [], attrs: {}, status: "Published", featured: false },
-
-  // Makeup (service)
-  { id: "signature-bridal-makeup", vendorId: "glam-squad-makeovers", title: "Signature Bridal Makeup", categoryId: "beauty-makeup", subcategoryId: "beauty-makeup-bridal-makeup", types: ["service"], pricing: { service: { amount: 55000, unit: "per event" } }, city: "Islamabad", description: "HD bridal makeup with hair styling and trial.", images: [], attrs: { teamSize: 2 }, status: "Published", featured: true },
-  { id: "mehndi-night-glam", vendorId: "glam-squad-makeovers", title: "Mehndi Night Glam", categoryId: "beauty-makeup", subcategoryId: "beauty-makeup-mehndi", types: ["service"], pricing: { service: { amount: 25000, unit: "per event" } }, city: "Islamabad", description: "Party makeup for mehndi festivities.", images: [], attrs: {}, status: "Published", featured: false },
-
-  // Music (service + rent)
-  { id: "live-dj-sound", vendorId: "beat-drop-djs", title: "Live DJ & Sound", categoryId: "music-entertainment", subcategoryId: "music-entertainment-dj", types: ["service"], pricing: { service: { amount: 90000, unit: "per event" } }, city: "Karachi", description: "Professional DJ with lighting and MC.", images: [], attrs: { coverage: "5 hrs" }, status: "Published", featured: false },
-  { id: "sound-system-rental", vendorId: "beat-drop-djs", title: "Sound System Rental", categoryId: "music-entertainment", subcategoryId: "music-entertainment-sound-system", types: ["rent"], pricing: { rent: { amount: 30000, unit: "per event", deposit: 8000 } }, city: "Karachi", description: "PA speakers, mics and mixer for the day.", images: [], attrs: {}, status: "Draft", featured: false },
-
-  // Bride (rent + purchase)
-  { id: "royal-red-bridal-lehenga", vendorId: "noor-bridal-couture", title: "Royal Red Bridal Lehenga", categoryId: "bride", subcategoryId: "bride-lehenga", types: ["rent", "purchase"], pricing: { rent: { amount: 60000, unit: "per event", deposit: 40000 }, purchase: { amount: 220000 } }, city: "Lahore", description: "Hand-embroidered red bridal lehenga, available to rent or buy.", images: [], attrs: { size: "S-L", color: "Red", fabric: "Velvet" }, status: "Published", featured: true },
-  { id: "ivory-walima-maxi", vendorId: "noor-bridal-couture", title: "Ivory Walima Maxi", categoryId: "bride", subcategoryId: "bride-bridal-maxi", types: ["rent", "purchase"], pricing: { rent: { amount: 45000, unit: "per event", deposit: 30000 }, purchase: { amount: 140000 } }, city: "Lahore", description: "Elegant ivory walima maxi with pearl work.", images: [], attrs: { size: "M-XL", color: "Ivory", fabric: "Organza" }, status: "Published", featured: false },
-
-  // Jewellery (rent + purchase, and purchase-only)
-  { id: "kundan-bridal-set", vendorId: "gold-leaf-jewellers", title: "Kundan Bridal Set", categoryId: "jewellery", subcategoryId: "jewellery-bridal-sets", types: ["rent", "purchase"], pricing: { rent: { amount: 25000, unit: "per event", deposit: 100000 }, purchase: { amount: 450000 } }, city: "Karachi", description: "Complete kundan bridal set: necklace, earrings, tikka.", images: [], attrs: { material: "Gold-plated" }, status: "Published", featured: false },
-  { id: "pearl-necklace", vendorId: "gold-leaf-jewellers", title: "Pearl Necklace", categoryId: "jewellery", subcategoryId: "jewellery-necklace", types: ["purchase"], pricing: { purchase: { amount: 85000 } }, city: "Karachi", description: "Freshwater pearl necklace with matching earrings.", images: [], attrs: { material: "Artificial" }, status: "Published", featured: false },
-];
-
-export const categories = [
-  { name: "Venues", listings: 214, color: "#4f46e5" },
-  { name: "Catering", listings: 168, color: "#0ea5a4" },
-  { name: "Photography", listings: 132, color: "#f59e0b" },
-  { name: "Decor & Florals", listings: 98, color: "#7c3aed" },
-  { name: "Entertainment", listings: 76, color: "#ec4899" },
-  { name: "Event Planners", listings: 54, color: "#2f6fed" },
-  { name: "Makeup & Salon", listings: 61, color: "#22a06b" },
-  { name: "Transport", listings: 33, color: "#d99400" },
 ];
 
 export const cities = [
@@ -229,6 +182,9 @@ export const statusColor = {
   Declined: "error",
   Rejected: "error",
   Suspended: "error",
+  Converted: "success",
+  Withdrawn: "default",
+  Cancelled: "error",
 };
 
 export const revenueByMonth = [3.1, 3.8, 3.4, 4.6, 4.3, 5.9, 5.5, 6.8, 6.4, 7.8, 8.9, 10.4];
@@ -240,38 +196,3 @@ export const bookingsByCity = [
   { city: "Faisalabad", value: 158 },
 ];
 export const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-
-
-export const inquiries = [
-  { id: "inq-1001", listingId: "royal-wedding-hall", vendorId: "gulmohar-banquet", type: "rent", customerName: "Ayesha Khan", customerEmail: "ayesha.k@email.com", customerCity: "Lahore", eventDate: "2026-11-20", message: "Need the main hall for ~500 guests, Nov walima.", status: "New", createdAt: "2026-08-18" },
-  { id: "inq-1002", listingId: "full-day-photo-film", vendorId: "frame-story-films", type: "service", customerName: "Zeeshan Ali", customerEmail: "zeeshan@email.com", customerCity: "Karachi", eventDate: "2026-10-05", message: "Full-day coverage for barat + walima.", status: "Confirmed", createdAt: "2026-08-15" },
-  { id: "inq-1003", listingId: "royal-red-bridal-lehenga", vendorId: "noor-bridal-couture", type: "rent", customerName: "Hina Raza", customerEmail: "hina.raza@email.com", customerCity: "Islamabad", eventDate: "2026-09-30", message: "Would like to rent the red lehenga, size M.", status: "New", createdAt: "2026-08-17" },
-  { id: "inq-1004", listingId: "royal-red-bridal-lehenga", vendorId: "noor-bridal-couture", type: "purchase", customerName: "Sana Malik", customerEmail: "sana.m@email.com", customerCity: "Karachi", eventDate: "", quantity: 1, message: "Interested in buying — can you share fabric details?", status: "Confirmed", createdAt: "2026-08-10" },
-  { id: "inq-1005", listingId: "premium-buffet-300", vendorId: "saffron-table-co", type: "service", customerName: "Bilal Ahmed", customerEmail: "bilal.a@email.com", customerCity: "Multan", eventDate: "2026-12-01", message: "300 guests, mixed menu. Need a quote.", status: "New", createdAt: "2026-08-16" },
-  { id: "inq-1006", listingId: "signature-bridal-makeup", vendorId: "glam-squad-makeovers", type: "service", customerName: "Mariam Yousuf", customerEmail: "mariam.y@email.com", customerCity: "Lahore", eventDate: "2026-10-18", message: "Bridal makeup + hair for nikkah.", status: "Rejected", createdAt: "2026-08-05" },
-  { id: "inq-1007", listingId: "garden-marquee-setup", vendorId: "the-grand-marquee", type: "rent", customerName: "Usman Tariq", customerEmail: "usman.t@email.com", customerCity: "Faisalabad", eventDate: "2026-11-08", message: "Outdoor marquee for 400, need setup by 4pm.", status: "Confirmed", createdAt: "2026-08-09" },
-  { id: "inq-1008", listingId: "live-dj-sound", vendorId: "beat-drop-djs", type: "service", customerName: "Hamza Sheikh", customerEmail: "hamza.s@email.com", customerCity: "Islamabad", eventDate: "2026-09-22", message: "DJ for mehndi night, 5 hours.", status: "New", createdAt: "2026-08-18" },
-  { id: "inq-1009", listingId: "kundan-bridal-set", vendorId: "gold-leaf-jewellers", type: "rent", customerName: "Ayesha Khan", customerEmail: "ayesha.k@email.com", customerCity: "Lahore", eventDate: "2026-11-20", message: "Rent the kundan set for walima day.", status: "New", createdAt: "2026-08-14" },
-  { id: "inq-1010", listingId: "pearl-necklace", vendorId: "gold-leaf-jewellers", type: "purchase", customerName: "Sana Malik", customerEmail: "sana.m@email.com", customerCity: "Karachi", eventDate: "", quantity: 1, message: "Bought — delivered, thanks!", status: "Completed", createdAt: "2026-07-28" },
-  { id: "inq-1011", listingId: "stage-floral-decor", vendorId: "the-floral-chapter", type: "service", customerName: "Bilal Ahmed", customerEmail: "bilal.a@email.com", customerCity: "Multan", eventDate: "2026-12-01", message: "Stage + entrance florals to match buffet booking.", status: "Confirmed", createdAt: "2026-08-11" },
-  { id: "inq-1012", listingId: "ivory-walima-maxi", vendorId: "noor-bridal-couture", type: "rent", customerName: "Hina Raza", customerEmail: "hina.raza@email.com", customerCity: "Islamabad", eventDate: "2026-10-02", message: "Rent ivory maxi for walima.", status: "New", createdAt: "2026-08-19" },
-  { id: "inq-1013", listingId: "continental-fine-dining", vendorId: "velvet-table-co", type: "service", customerName: "Usman Tariq", customerEmail: "usman.t@email.com", customerCity: "Faisalabad", eventDate: "2026-11-08", message: "Plated dinner for 150, done — great service.", status: "Completed", createdAt: "2026-07-30" },
-  { id: "inq-1014", listingId: "mehndi-night-glam", vendorId: "glam-squad-makeovers", type: "service", customerName: "Zeeshan Ali", customerEmail: "zeeshan@email.com", customerCity: "Karachi", eventDate: "2026-10-04", message: "Party makeup for 2 for mehndi.", status: "Rejected", createdAt: "2026-08-06" },
-];
-
-
-export const calendarEntries = [
-  // Gulmohar Banquet — default login vendor (populated so the calendar isn't empty)
-  { id: "cal-2001", vendorId: "gulmohar-banquet", date: "2026-08-23", time: "7:00 PM", kind: "booking", title: "Ali–Sara Walima", customerName: "Ali Raza", note: "500 guests, main hall" },
-  { id: "cal-2002", vendorId: "gulmohar-banquet", date: "2026-08-23", time: "2:00 PM", kind: "hold", title: "Site visit — Khan family", customerName: "Imran Khan", note: "Tentative, confirm by Fri" },
-  { id: "cal-2003", vendorId: "gulmohar-banquet", date: "2026-08-28", time: "6:00 PM", kind: "booking", title: "Khan Mehndi", customerName: "Sadia Khan", note: "" },
-  { id: "cal-2004", vendorId: "gulmohar-banquet", date: "2026-09-05", time: "8:00 PM", kind: "booking", title: "Corporate dinner", customerName: "TechCorp", note: "AV setup needed" },
-  { id: "cal-2005", vendorId: "gulmohar-banquet", date: "2026-09-14", time: "", kind: "hold", title: "Tentative — Sept walima", customerName: "", note: "Awaiting advance" },
-  { id: "cal-2006", vendorId: "gulmohar-banquet", date: "2026-10-12", time: "7:30 PM", kind: "booking", title: "Malik Nikkah", customerName: "Bilal Malik", note: "" },
-  { id: "cal-2007", vendorId: "gulmohar-banquet", date: "2026-08-30", time: "", kind: "note", title: "Staff off — maintenance", customerName: "", note: "Deep clean" },
-
-  // Other vendors — linked to their confirmed inquiries
-  { id: "cal-2101", vendorId: "frame-story-films", date: "2026-10-05", time: "9:00 AM", kind: "booking", title: "Zeeshan wedding shoot", customerName: "Zeeshan Ali", note: "Full-day coverage", linkedInquiryId: "inq-1002" },
-  { id: "cal-2102", vendorId: "the-grand-marquee", date: "2026-11-08", time: "4:00 PM", kind: "booking", title: "Usman marquee", customerName: "Usman Tariq", note: "400 guests outdoor", linkedInquiryId: "inq-1007" },
-  { id: "cal-2103", vendorId: "the-floral-chapter", date: "2026-12-01", time: "3:00 PM", kind: "booking", title: "Bilal stage & florals", customerName: "Bilal Ahmed", note: "Match buffet booking", linkedInquiryId: "inq-1011" },
-];

@@ -6,28 +6,28 @@ import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { PieChart } from "@mui/x-charts/PieChart";
-import { getCategory } from "@/config/categoryTree";
 
 const COLORS = ["#4f46e5", "#0ea5a4", "#f59e0b", "#7c3aed", "#ec4899", "#2f6fed"];
 
+/* Listings were removed in the vertical rebuild, so the mix is computed from
+   vendors per category until listings return. */
 export default function CategoryPie() {
-  const listings = useSelector((s) => s.listings.items);
+  const vendors = useSelector((s) => s.vendors.items);
 
   const data = useMemo(() => {
     const counts = {};
-    listings.forEach((l) => { counts[l.categoryId] = (counts[l.categoryId] || 0) + 1; });
-    const total = listings.length || 1;
-    const top = Object.entries(counts)
+    vendors.forEach((v) => { counts[v.category] = (counts[v.category] || 0) + 1; });
+    const total = vendors.length || 1;
+    return Object.entries(counts)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 5)
-      .map(([categoryId, n], i) => ({
+      .map(([name, n], i) => ({
         id: i,
         value: Math.round((n / total) * 100),
-        label: getCategory(categoryId)?.name || categoryId,
+        label: name,
         color: COLORS[i % COLORS.length],
       }));
-    return top;
-  }, [listings]);
+  }, [vendors]);
 
   const shown = data.reduce((s, d) => s + d.value, 0);
 
@@ -42,7 +42,7 @@ export default function CategoryPie() {
         />
         <Box sx={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
           <Typography variant="h5" fontWeight={800}>{shown}%</Typography>
-          <Typography variant="caption" color="text.secondary">of listings</Typography>
+          <Typography variant="caption" color="text.secondary">of vendors</Typography>
         </Box>
       </Box>
       <Stack spacing={1.25} sx={{ width: "100%" }}>
@@ -53,7 +53,7 @@ export default function CategoryPie() {
             <Typography variant="body2" fontWeight={700}>{d.value}%</Typography>
           </Stack>
         ))}
-        {data.length === 0 && <Typography variant="body2" color="text.secondary">No listings yet.</Typography>}
+        {data.length === 0 && <Typography variant="body2" color="text.secondary">No vendors yet.</Typography>}
       </Stack>
     </Stack>
   );

@@ -1,58 +1,57 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
+import { useRouter } from "next/navigation";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
-import Chip from "@mui/material/Chip";
 import Avatar from "@mui/material/Avatar";
 import TextField from "@mui/material/TextField";
+import Chip from "@mui/material/Chip";
 import InputAdornment from "@mui/material/InputAdornment";
 import LinearProgress from "@mui/material/LinearProgress";
 import Divider from "@mui/material/Divider";
+import Alert from "@mui/material/Alert";
 import { alpha } from "@mui/material/styles";
 import AutoAwesomeRoundedIcon from "@mui/icons-material/AutoAwesomeRounded";
-import { CATEGORY_TREE, getCategory } from "@/config/categoryTree";
+import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
 import { getCategoryIcon } from "@/config/categoryIcons";
-import { startingPrice, priceLabel, typeChips } from "@/utils/listing";
+import { VERTICALS } from "@/config/categoryTree";
+import { startingPrice, priceLabel, capacityLabel } from "@/utils/listing";
+import { pkr } from "@/utils/booking";
 
-const fmt = (n) => `PKR ${Number(n || 0).toLocaleString("en-PK")}`;
-
-// suggested share of the total per category (renormalised over what's available)
+/* Suggested share of the total per category. Renormalised over whatever
+   categories actually have published listings. */
 const SUGGESTED = {
-  venues: 35, catering: 20, decoration: 12, "photography-video": 10,
-  bride: 8, "music-entertainment": 5, "beauty-makeup": 5, jewellery: 5,
-};
-
-const TYPE_COLORS = {
-  rent: { bg: "#e0edff", fg: "#1d4ed8" },
-  purchase: { bg: "#dcfce7", fg: "#15803d" },
-  service: { bg: "#ede9fe", fg: "#6d28d9" },
+  venues: 40, catering: 30, decoration: 12, "photography-video": 8,
+  bride: 4, "music-entertainment": 3, "beauty-makeup": 2, jewellery: 1,
 };
 
 export default function BudgetPlannerPage() {
   const router = useRouter();
-  const listings = useSelector((s) => s.listings.items.filter((l) => l.status === "Published"));
+  const allListings = useSelector((s) => s.listings.items);
+  const storeCategories = useSelector((s) => s.categories.items);
 
   const [total, setTotal] = useState(1500000);
+  const [guests, setGuests] = useState(300);
   const [alloc, setAlloc] = useState({});
 
-  // categories that actually have published listings
-  const categories = useMemo(() => {
-    const counts = {};
-    listings.forEach((l) => { counts[l.categoryId] = (counts[l.categoryId] || 0) + 1; });
-    return CATEGORY_TREE.filter((c) => counts[c.id]);
-  }, [listings]);
+  const published = useMemo(() => allListings.filter((l) => l.status === "Published"), [allListings]);
 
-  const listingsByCat = useMemo(() => {
+  /* Only categories that actually have something to show. */
+  const categories = useMemo(() => {
+    const ids = new Set(published.map((l) => l.categoryId));
+    return storeCategories.filter((c) => ids.has(c.id));
+  }, [published, storeCategories]);
+
+  const byCat = useMemo(() => {
     const m = {};
-    listings.forEach((l) => { (m[l.categoryId] = m[l.categoryId] || []).push(l); });
+    published.forEach((l) => { (m[l.categoryId] = m[l.categoryId] || []).push(l); });
     return m;
-  }, [listings]);
+  }, [published]);
 
   const allocated = Object.values(alloc).reduce((a, b) => a + (Number(b) || 0), 0);
   const remaining = total - allocated;
@@ -70,116 +69,136 @@ export default function BudgetPlannerPage() {
 
   const activeCats = categories.filter((c) => Number(alloc[c.id]) > 0);
 
+  /* What a listing actually costs for THIS wedding: catering scales by
+     headcount, halls are a flat per-event rate. */
+  const costFor = (listing) => {
+    if (listing.vertical === VERTICALS.CATERING) return (listing.catering?.perHeadFrom || 0) * (Number(guests) || 0);
+    return startingPrice(listing);
+  };
+
+  const matchesFor = (categoryId) => {
+    const budget = Number(alloc[categoryId]) || 0;
+    return (byCat[categoryId] || [])
+      .map((l) => ({ listing: l, cost: costFor(l) }))
+      .filter((x) => x.cost > 0 && x.cost <= budget)
+      .sort((a, b) => b.cost - a.cost)
+      .slice(0, 3);
+  };
+
   return (
     <Stack spacing={3}>
       <Box>
         <Typography variant="h4" fontWeight={800}>Budget planner</Typography>
-        <Typography color="text.secondary">Set a budget, split it across categories, and see what fits.</Typography>
+        <Typography color="text.secondary">Split your budget, then see what actually fits it.</Typography>
       </Box>
 
-      {/* Budget + allocation */}
-      <Card sx={{ p: { xs: 2, md: 3 } }}>
-        <Stack direction={{ xs: "column", md: "row" }} spacing={2} sx={{ alignItems: { md: "flex-end" }, justifyContent: "space-between" }}>
+      {/* Totals */}
+      <Card sx={{ p: { xs: 2.5, md: 3.5 } }}>
+        <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" } }}>
           <TextField
-            label="Total wedding budget"
-            size="medium"
-            type="number"
-            value={total}
+            label="Total wedding budget" size="small" type="number" value={total}
             onChange={(e) => setTotal(Number(e.target.value) || 0)}
             slotProps={{ input: { startAdornment: <InputAdornment position="start">PKR</InputAdornment> } }}
-            sx={{ maxWidth: 280 }}
           />
-          <Stack direction="row" spacing={1}>
-            <Button variant="contained" startIcon={<AutoAwesomeRoundedIcon />} onClick={suggestSplit}>Suggest a split</Button>
-            <Button color="inherit" onClick={clearSplit}>Clear</Button>
-          </Stack>
+          <TextField
+            label="Expected guests" size="small" type="number" value={guests}
+            onChange={(e) => setGuests(Number(e.target.value) || 0)}
+            helperText="Catering is priced per head, so this changes what fits"
+          />
+        </Box>
+
+        <Stack direction="row" spacing={3} sx={{ mt: 3, flexWrap: "wrap", gap: 2 }}>
+          <Box><Typography variant="caption" color="text.secondary">Allocated</Typography>
+            <Typography variant="h6" fontWeight={800}>{pkr(allocated)}</Typography></Box>
+          <Box><Typography variant="caption" color="text.secondary">Left to allocate</Typography>
+            <Typography variant="h6" fontWeight={800} color={remaining < 0 ? "error.main" : "success.main"}>{pkr(remaining)}</Typography></Box>
         </Stack>
+        <LinearProgress variant="determinate" value={pct} sx={{ mt: 1.5, height: 8, borderRadius: 5 }} />
+        {remaining < 0 && <Alert severity="warning" sx={{ mt: 2 }}>You&apos;re {pkr(Math.abs(remaining))} over budget.</Alert>}
 
-        <Box sx={{ mt: 2.5 }}>
-          <Stack direction="row" sx={{ justifyContent: "space-between", mb: 0.5 }}>
-            <Typography variant="body2" color="text.secondary">Allocated {fmt(allocated)}</Typography>
-            <Typography variant="body2" fontWeight={700} color={remaining < 0 ? "error.main" : "text.secondary"}>
-              {remaining < 0 ? `Over by ${fmt(-remaining)}` : `${fmt(remaining)} left`}
-            </Typography>
-          </Stack>
-          <LinearProgress variant="determinate" value={pct} sx={{ height: 8, borderRadius: 5, ...(remaining < 0 ? { "& .MuiLinearProgress-bar": { bgcolor: "error.main" } } : {}) }} />
-        </Box>
-
-        <Divider sx={{ my: 2.5 }} />
-
-        <Typography variant="overline" color="text.secondary">Allocate by category</Typography>
-        <Box sx={{ display: "grid", gap: 1.5, gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "1fr 1fr 1fr" }, mt: 1 }}>
-          {categories.map((c) => (
-            <Stack key={c.id} direction="row" spacing={1} sx={{ alignItems: "center" }}>
-              <Box sx={{ fontSize: 18 }}>{c.emoji}</Box>
-              <TextField
-                label={c.name}
-                size="small"
-                type="number"
-                fullWidth
-                value={alloc[c.id] ?? ""}
-                onChange={(e) => setCat(c.id, e.target.value)}
-                slotProps={{ input: { startAdornment: <InputAdornment position="start">PKR</InputAdornment> } }}
-              />
-            </Stack>
-          ))}
-        </Box>
+        <Stack direction="row" spacing={1.5} sx={{ mt: 2.5 }}>
+          <Button variant="contained" startIcon={<AutoAwesomeRoundedIcon />} onClick={suggestSplit}>Suggest a split</Button>
+          <Button color="inherit" onClick={clearSplit}>Clear</Button>
+        </Stack>
       </Card>
 
-      {/* Results */}
+      {/* Allocation */}
+      <Card sx={{ p: { xs: 2, md: 3 } }}>
+        <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>Where does it go?</Typography>
+        <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" } }}>
+          {categories.map((c) => {
+            const Icon = getCategoryIcon(c.iconKey);
+            const n = (byCat[c.id] || []).length;
+            return (
+              <Stack key={c.id} direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
+                <Avatar variant="rounded" sx={{ width: 38, height: 38, borderRadius: 2, bgcolor: alpha(c.color, 0.14), color: c.color }}>
+                  {c.emoji ? <Box sx={{ fontSize: 18 }}>{c.emoji}</Box> : <Icon fontSize="small" />}
+                </Avatar>
+                <TextField
+                  label={c.name} size="small" type="number" fullWidth
+                  value={alloc[c.id] ?? ""} onChange={(e) => setCat(c.id, e.target.value)}
+                  helperText={`${n} listing${n === 1 ? "" : "s"} available`}
+                  slotProps={{ input: { startAdornment: <InputAdornment position="start">PKR</InputAdornment> } }}
+                />
+              </Stack>
+            );
+          })}
+        </Box>
+        {categories.length === 0 && <Typography color="text.secondary">No published listings to plan against yet.</Typography>}
+      </Card>
+
+      {/* Matches */}
       {activeCats.length === 0 ? (
         <Card sx={{ p: 6, textAlign: "center" }}>
-          <Typography color="text.secondary">Allocate a budget to a category (or use “Suggest a split”) to see listings that fit.</Typography>
+          <Typography color="text.secondary">
+            Allocate a budget above (or hit &ldquo;Suggest a split&rdquo;) to see what fits.
+          </Typography>
         </Card>
       ) : (
         <Stack spacing={3}>
           {activeCats.map((c) => {
-            const budget = Number(alloc[c.id]);
-            const all = (listingsByCat[c.id] || []);
-            const fits = all.filter((l) => { const p = startingPrice(l); return p != null && p <= budget; })
-              .sort((a, b) => (startingPrice(a) ?? 0) - (startingPrice(b) ?? 0));
-            const Icon = getCategoryIcon(c.iconKey);
+            const matches = matchesFor(c.id);
+            const budget = Number(alloc[c.id]) || 0;
             return (
-              <Box key={c.id}>
-                <Stack direction="row" spacing={1.5} sx={{ alignItems: "center", mb: 1.5 }}>
-                  <Avatar variant="rounded" sx={{ width: 40, height: 40, borderRadius: 2, bgcolor: alpha(c.color, 0.14), color: c.color }}>
-                    {c.emoji ? <Box sx={{ fontSize: 20 }}>{c.emoji}</Box> : <Icon fontSize="small" />}
-                  </Avatar>
-                  <Box sx={{ flex: 1 }}>
-                    <Typography variant="h6" fontWeight={800}>{c.name}</Typography>
-                    <Typography variant="caption" color="text.secondary">{fmt(budget)} budget · {fits.length} of {all.length} fit</Typography>
-                  </Box>
+              <Card key={c.id} sx={{ p: { xs: 2, md: 3 } }}>
+                <Stack direction="row" spacing={1.5} sx={{ alignItems: "center", mb: 2 }}>
+                  <Typography variant="h6" fontWeight={700}>{c.name}</Typography>
+                  <Chip size="small" label={`${pkr(budget)} budget`} sx={{ fontWeight: 700, bgcolor: alpha(c.color, 0.12), color: c.color }} />
                 </Stack>
-                {fits.length === 0 ? (
-                  <Card sx={{ p: 3, textAlign: "center", bgcolor: "grey.50" }}>
-                    <Typography variant="body2" color="text.secondary">Nothing in {c.name} under {fmt(budget)}. Try allocating more.</Typography>
-                  </Card>
+
+                {matches.length === 0 ? (
+                  <Typography variant="body2" color="text.secondary">
+                    Nothing in {c.name} fits {pkr(budget)}
+                    {(byCat[c.id] || []).some((l) => l.vertical === VERTICALS.CATERING) ? ` for ${guests} guests` : ""}. Try raising it.
+                  </Typography>
                 ) : (
-                  <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", sm: "repeat(2,1fr)", md: "repeat(4,1fr)" } }}>
-                    {fits.slice(0, 4).map((l) => {
-                      const cat = getCategory(l.categoryId);
+                  <Stack spacing={1.25}>
+                    {matches.map(({ listing, cost }) => {
+                      const price = priceLabel(listing);
+                      const cap = capacityLabel(listing);
                       return (
-                        <Card key={l.id} sx={{ overflow: "hidden", cursor: "pointer", "&:hover": { boxShadow: 4 } }} onClick={() => router.push(`/user/listing/${l.id}`)}>
-                          <Box sx={{ height: 84, background: `linear-gradient(135deg, ${alpha(cat?.color || "#4f46e5", 0.85)}, ${cat?.color || "#7c3aed"})` }} />
-                          <Box sx={{ p: 1.5 }}>
-                            <Typography variant="subtitle2" fontWeight={700} noWrap>{l.title}</Typography>
-                            <Typography variant="caption" color="text.secondary" noWrap sx={{ display: "block" }}>{l.city}</Typography>
-                            <Stack direction="row" spacing={0.5} sx={{ mt: 0.5, flexWrap: "wrap", gap: 0.5 }}>
-                              {typeChips(l).slice(0, 2).map((tc) => (
-                                <Chip key={tc.type} label={tc.label} size="small" sx={{ fontWeight: 700, height: 20, fontSize: 10, bgcolor: TYPE_COLORS[tc.type]?.bg, color: TYPE_COLORS[tc.type]?.fg }} />
-                              ))}
-                            </Stack>
-                            <Typography variant="subtitle2" fontWeight={800} color="primary.main" sx={{ mt: 0.5 }}>{priceLabel(l)}</Typography>
+                        <Stack key={listing.id} direction={{ xs: "column", sm: "row" }} spacing={1.5}
+                          onClick={() => router.push(`/user/listing/${listing.id}`)}
+                          sx={{ alignItems: { sm: "center" }, p: 1.75, borderRadius: 2, border: "1px solid", borderColor: "divider", cursor: "pointer", "&:hover": { boxShadow: 2 } }}>
+                          <Box sx={{ flex: 1, minWidth: 0 }}>
+                            <Typography variant="subtitle2" fontWeight={800}>{listing.title}</Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              {listing.city}{cap ? ` · ${cap}` : ""} · {price.value}{price.unit}
+                            </Typography>
                           </Box>
-                        </Card>
+                          <Box sx={{ textAlign: { sm: "right" } }}>
+                            <Typography variant="subtitle2" fontWeight={800} color="primary.main">{pkr(cost)}</Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              {listing.vertical === VERTICALS.CATERING ? `for ${guests} guests` : "per event"}
+                            </Typography>
+                          </Box>
+                          <ArrowForwardRoundedIcon fontSize="small" sx={{ color: "text.secondary" }} />
+                        </Stack>
                       );
                     })}
-                  </Box>
+                  </Stack>
                 )}
-                {fits.length > 4 && (
-                  <Button size="small" sx={{ mt: 1 }} onClick={() => router.push(`/user/browse?cat=${c.id}`)}>See all {fits.length} in {c.name}</Button>
-                )}
-              </Box>
+              </Card>
             );
           })}
         </Stack>

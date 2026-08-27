@@ -15,7 +15,7 @@ import InputAdornment from "@mui/material/InputAdornment";
 import InstagramIcon from "@mui/icons-material/Instagram";
 import FacebookIcon from "@mui/icons-material/Facebook";
 import LanguageRoundedIcon from "@mui/icons-material/LanguageRounded";
-import { CITY_OPTIONS } from "@/config/vendorCategories";
+import { CITY_OPTIONS } from "@/config/cities";
 
 /* Profile-only edit. Deliberately excludes category, verification/premium/status,
    packages and category attributes — those belong to the marketplace team or to

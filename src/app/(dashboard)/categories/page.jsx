@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 import Card from "@mui/material/Card";
@@ -19,8 +19,8 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import TextField from "@mui/material/TextField";
 import MenuItem from "@mui/material/MenuItem";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Checkbox from "@mui/material/Checkbox";
+import Tabs from "@mui/material/Tabs";
+import Tab from "@mui/material/Tab";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
@@ -29,20 +29,27 @@ import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
 import { alpha } from "@mui/material/styles";
 import PageHeader from "@/components/layout/PageHeader";
 import { ICON_OPTIONS, ICON_REGISTRY, CATEGORY_COLORS, getCategoryIcon } from "@/config/categoryIcons";
-import { FIELD_TEMPLATES, TYPE_LABELS, LISTING_TYPES } from "@/config/categoryTree";
+import { VERTICAL_OPTIONS, VERTICAL_LABELS, VERTICALS } from "@/config/categoryTree";
 import { categoriesActions } from "@/store";
 import { notify } from "@/store/uiSlice";
-import { slugify, uniqueSlug } from "@/utils/slug";
+import { uniqueSlug } from "@/utils/slug";
 
-const TYPE_COLORS = {
-  rent: { bg: "#e0edff", fg: "#1d4ed8" },
-  purchase: { bg: "#dcfce7", fg: "#15803d" },
-  service: { bg: "#ede9fe", fg: "#6d28d9" },
+const VERTICAL_COLORS = {
+  hall: { bg: "#e0edff", fg: "#1d4ed8" },
+  catering: { bg: "#fef3c7", fg: "#b45309" },
+  generic: { bg: "#f1f5f9", fg: "#64748b" },
 };
-const ALL_TYPES = [LISTING_TYPES.RENT, LISTING_TYPES.PURCHASE, LISTING_TYPES.SERVICE];
-const TEMPLATE_KEYS = Object.keys(FIELD_TEMPLATES);
 
-const emptyForm = { name: "", emoji: "🎉", iconKey: "celebration", color: CATEGORY_COLORS[0], allowedTypes: ["rent"], fieldTemplate: "generic" };
+const FILTERS = ["All", "Hall / Venue", "Catering", "Generic"];
+const FILTER_VERTICAL = [null, VERTICALS.HALL, VERTICALS.CATERING, VERTICALS.GENERIC];
+
+const emptyForm = {
+  name: "",
+  emoji: "\u{1F389}",
+  iconKey: "celebration",
+  color: CATEGORY_COLORS[0],
+  vertical: VERTICALS.GENERIC,
+};
 
 // small inline "add subcategory" control
 function AddSub({ onAdd }) {
@@ -51,7 +58,7 @@ function AddSub({ onAdd }) {
   return (
     <Stack direction="row" spacing={1} sx={{ mt: 1, alignItems: "center" }}>
       <Box sx={{ display: "flex", alignItems: "center", px: 1.5, height: 34, flex: 1, borderRadius: 2, border: "1px solid", borderColor: "divider", bgcolor: "grey.50" }}>
-        <InputBase placeholder="Add subcategory…" value={v} onChange={(e) => setV(e.target.value)} onKeyDown={(e) => e.key === "Enter" && submit()} sx={{ fontSize: 13, flex: 1 }} />
+        <InputBase placeholder="Add subcategory\u2026" value={v} onChange={(e) => setV(e.target.value)} onKeyDown={(e) => e.key === "Enter" && submit()} sx={{ fontSize: 13, flex: 1 }} />
       </Box>
       <IconButton size="small" onClick={submit} disabled={!v.trim()}><AddRoundedIcon fontSize="small" /></IconButton>
     </Stack>
@@ -60,58 +67,68 @@ function AddSub({ onAdd }) {
 
 export default function CategoriesPage() {
   const categories = useSelector((s) => s.categories.items);
-  const listings = useSelector((s) => s.listings.items);
   const dispatch = useDispatch();
   const router = useRouter();
 
   const [dialog, setDialog] = useState({ open: false, edit: null });
   const [form, setForm] = useState(emptyForm);
+  const [filter, setFilter] = useState(0);
 
-  const countByCat = useMemo(() => {
-    const m = {};
-    listings.forEach((l) => { m[l.categoryId] = (m[l.categoryId] || 0) + 1; });
-    return m;
-  }, [listings]);
+  const vFilter = FILTER_VERTICAL[filter];
+  const rows = vFilter ? categories.filter((c) => (c.vertical || VERTICALS.GENERIC) === vFilter) : categories;
 
   const openAdd = () => { setForm(emptyForm); setDialog({ open: true, edit: null }); };
   const openEdit = (c) => {
-    setForm({ name: c.name, emoji: c.emoji || "🎉", iconKey: c.iconKey, color: c.color, allowedTypes: [...(c.allowedTypes || [])], fieldTemplate: c.fieldTemplate || "generic" });
+    setForm({
+      name: c.name,
+      emoji: c.emoji || "\u{1F389}",
+      iconKey: c.iconKey,
+      color: c.color,
+      vertical: c.vertical || VERTICALS.GENERIC,
+    });
     setDialog({ open: true, edit: c });
   };
   const close = () => setDialog({ open: false, edit: null });
 
-  const toggleType = (t) =>
-    setForm((f) => ({ ...f, allowedTypes: f.allowedTypes.includes(t) ? f.allowedTypes.filter((x) => x !== t) : [...f.allowedTypes, t] }));
-
   const save = () => {
     const name = form.name.trim();
     if (dialog.edit) {
-      dispatch(categoriesActions.update({ name: dialog.edit.name, emoji: form.emoji, iconKey: form.iconKey, color: form.color, allowedTypes: form.allowedTypes, fieldTemplate: form.fieldTemplate }));
-      dispatch(notify(`“${name}” updated`));
+      dispatch(categoriesActions.update({
+        name: dialog.edit.name, emoji: form.emoji, iconKey: form.iconKey, color: form.color, vertical: form.vertical,
+      }));
+      dispatch(notify(`\u201C${name}\u201D updated`));
     } else {
       const id = uniqueSlug(name, categories.map((c) => c.id));
-      dispatch(categoriesActions.add({ id, name, emoji: form.emoji, iconKey: form.iconKey, color: form.color, allowedTypes: form.allowedTypes, fieldTemplate: form.fieldTemplate, subcategories: [] }));
-      dispatch(notify(`Category “${name}” created`));
+      dispatch(categoriesActions.add({
+        id, name, emoji: form.emoji, iconKey: form.iconKey, color: form.color, vertical: form.vertical, subcategories: [],
+      }));
+      dispatch(notify(`Category \u201C${name}\u201D created`));
     }
     close();
   };
 
-  const canSave = form.name.trim() && form.allowedTypes.length > 0;
+  const canSave = Boolean(form.name.trim());
 
   return (
     <Box>
       <PageHeader
         overline="Marketplace"
         title="Categories"
-        subtitle="Manage the category tree — parents, subcategories, the listing types each allows, and its field template."
+        subtitle="Manage the category tree \u2014 parents, subcategories, and the vertical each belongs to."
         action={<Button variant="contained" startIcon={<AddRoundedIcon />} onClick={openAdd}>Add category</Button>}
       />
 
+      <Card sx={{ p: { xs: 1.5, md: 2 }, mb: 3 }}>
+        <Tabs value={filter} onChange={(_, v) => setFilter(v)} variant="scrollable" scrollButtons="auto" sx={{ minHeight: 40, "& .MuiTab-root": { minHeight: 40, textTransform: "none", fontWeight: 600 } }}>
+          {FILTERS.map((t) => <Tab key={t} label={t} />)}
+        </Tabs>
+      </Card>
+
       <Box sx={{ display: "grid", gap: 3, gridTemplateColumns: { xs: "1fr", md: "repeat(2,1fr)", xl: "repeat(3,1fr)" } }}>
-        {categories.map((c) => {
+        {rows.map((c) => {
           const Icon = getCategoryIcon(c.iconKey);
-          const count = countByCat[c.id] || 0;
           const subs = c.subcategories || [];
+          const vert = c.vertical || VERTICALS.GENERIC;
           return (
             <Card key={c.id} sx={{ p: { xs: 2, md: 3 } }}>
               <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
@@ -124,7 +141,7 @@ export default function CategoriesPage() {
                     {c.custom && <Chip size="small" label="Custom" sx={{ bgcolor: "grey.100", fontWeight: 600 }} />}
                   </Stack>
                   <Typography variant="body2" color="text.secondary">
-                    {count} listing{count === 1 ? "" : "s"} · {subs.length} subcategor{subs.length === 1 ? "y" : "ies"}
+                    {subs.length} subcategor{subs.length === 1 ? "y" : "ies"}
                   </Typography>
                 </Box>
                 <IconButton size="small" onClick={() => openEdit(c)}><EditRoundedIcon fontSize="small" /></IconButton>
@@ -133,12 +150,9 @@ export default function CategoriesPage() {
                 </IconButton>
               </Stack>
 
-              {/* allowed types */}
+              {/* vertical */}
               <Stack direction="row" spacing={0.75} sx={{ mt: 1.5, flexWrap: "wrap", gap: 0.75 }}>
-                {(c.allowedTypes || []).map((t) => (
-                  <Chip key={t} size="small" label={TYPE_LABELS[t]} sx={{ fontWeight: 700, bgcolor: TYPE_COLORS[t]?.bg, color: TYPE_COLORS[t]?.fg }} />
-                ))}
-                <Chip size="small" variant="outlined" label={`fields: ${c.fieldTemplate || "generic"}`} sx={{ fontWeight: 600 }} />
+                <Chip size="small" label={VERTICAL_LABELS[vert]} sx={{ fontWeight: 700, bgcolor: VERTICAL_COLORS[vert]?.bg, color: VERTICAL_COLORS[vert]?.fg }} />
               </Stack>
 
               <Divider sx={{ my: 2 }} />
@@ -158,7 +172,7 @@ export default function CategoriesPage() {
                 ))}
                 {subs.length === 0 && <Typography variant="caption" color="text.secondary">No subcategories yet.</Typography>}
               </Stack>
-              <AddSub onAdd={(name) => { dispatch(categoriesActions.addSubcategory({ category: c.name, name })); dispatch(notify(`“${name}” added`)); }} />
+              <AddSub onAdd={(name) => { dispatch(categoriesActions.addSubcategory({ category: c.name, name })); dispatch(notify(`\u201C${name}\u201D added`)); }} />
 
               <Button fullWidth variant="outlined" color="inherit" endIcon={<ArrowForwardRoundedIcon />} sx={{ mt: 2.5 }} onClick={() => router.push(`/vendors?cat=${encodeURIComponent(c.name)}`)}>
                 View {c.name} vendors
@@ -166,27 +180,33 @@ export default function CategoriesPage() {
             </Card>
           );
         })}
+        {rows.length === 0 && (
+          <Card sx={{ p: 6, textAlign: "center", gridColumn: "1 / -1" }}>
+            <Typography color="text.secondary">No categories in this vertical.</Typography>
+          </Card>
+        )}
       </Box>
 
       {/* Add / edit category dialog */}
       <Dialog open={dialog.open} onClose={close} fullWidth maxWidth="sm">
-        <DialogTitle sx={{ fontWeight: 700 }}>{dialog.edit ? `Edit — ${dialog.edit.name}` : "Add category"}</DialogTitle>
+        <DialogTitle sx={{ fontWeight: 700 }}>{dialog.edit ? `Edit \u2014 ${dialog.edit.name}` : "Add category"}</DialogTitle>
         <DialogContent dividers>
           <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: "80px 1fr", mt: 1 }}>
             <TextField label="Emoji" size="small" value={form.emoji} onChange={(e) => setForm((f) => ({ ...f, emoji: e.target.value }))} />
             <TextField label="Category name" size="small" value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} disabled={Boolean(dialog.edit)} helperText={dialog.edit ? "Renaming isn't supported here" : " "} />
           </Box>
 
-          <Typography variant="overline" color="text.secondary" sx={{ display: "block", mt: 1.5, mb: 1 }}>Listing types allowed</Typography>
-          <Stack direction="row" spacing={1}>
-            {ALL_TYPES.map((t) => (
-              <FormControlLabel key={t} control={<Checkbox checked={form.allowedTypes.includes(t)} onChange={() => toggleType(t)} />} label={TYPE_LABELS[t]} />
-            ))}
-          </Stack>
-
-          <TextField label="Field template" size="small" select fullWidth value={form.fieldTemplate} onChange={(e) => setForm((f) => ({ ...f, fieldTemplate: e.target.value }))} sx={{ mt: 1 }}>
-            {TEMPLATE_KEYS.map((k) => (
-              <MenuItem key={k} value={k}>{k}{FIELD_TEMPLATES[k].length ? ` (${FIELD_TEMPLATES[k].map((x) => x.name).join(", ")})` : " (no extra fields)"}</MenuItem>
+          <Typography variant="overline" color="text.secondary" sx={{ display: "block", mt: 1.5, mb: 1 }}>Vertical</Typography>
+          <TextField
+            size="small"
+            select
+            fullWidth
+            value={form.vertical}
+            onChange={(e) => setForm((f) => ({ ...f, vertical: e.target.value }))}
+            helperText={VERTICAL_OPTIONS.find((v) => v.id === form.vertical)?.hint || " "}
+          >
+            {VERTICAL_OPTIONS.map((v) => (
+              <MenuItem key={v.id} value={v.id}>{v.label}</MenuItem>
             ))}
           </TextField>
 

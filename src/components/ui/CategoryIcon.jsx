@@ -3,12 +3,15 @@
 import { useSelector } from "react-redux";
 import Stack from "@mui/material/Stack";
 import { getCategoryIcon } from "@/config/categoryIcons";
-import { categoryMeta } from "@/config/vendorCategories";
+import { getCategoryByName } from "@/config/categoryTree";
 
 function useCat(category) {
   const cat = useSelector((s) => s.categories.items.find((c) => c.name === category));
-  const fallback = categoryMeta(category);
-  return { iconKey: cat?.iconKey || fallback.iconKey, color: cat?.color || fallback.color };
+  const fallback = getCategoryByName(category);
+  return {
+    iconKey: cat?.iconKey || fallback?.iconKey || "celebration",
+    color: cat?.color || fallback?.color || "#4f46e5",
+  };
 }
 
 /** Renders a category's MUI icon (resolved from the store, with its color). */

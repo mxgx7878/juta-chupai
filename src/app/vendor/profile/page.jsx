@@ -39,7 +39,6 @@ function Stat({ label, value }) {
 export default function VendorProfilePage() {
   const vendorId = useSelector((s) => s.session.vendorId);
   const vendor = useSelector((s) => s.vendors.items.find((v) => v.id === vendorId));
-  const myListings = useSelector((s) => s.listings.items.filter((l) => l.vendorId === vendorId));
   const dispatch = useDispatch();
   const [edit, setEdit] = useState(false);
 
@@ -79,7 +78,6 @@ export default function VendorProfilePage() {
           <Stack direction="row" spacing={1.5} sx={{ mt: 3 }}>
             <Stat label="Rating" value={vendor.rating || "—"} />
             <Stat label="Reviews" value={vendor.reviews ?? 0} />
-            <Stat label="Listings" value={myListings.length} />
             <Stat label="Experience" value={vendor.experience || "—"} />
           </Stack>
         </Box>

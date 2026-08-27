@@ -13,7 +13,8 @@ import ListItemText from "@mui/material/ListItemText";
 import Chip from "@mui/material/Chip";
 import Avatar from "@mui/material/Avatar";
 import StorefrontRoundedIcon from "@mui/icons-material/StorefrontRounded";
-import { vendorNav } from "@/config/vendorNav";
+import { vendorNavFor } from "@/config/vendorNav";
+import { vendorVertical } from "@/utils/vertical";
 
 export const SIDEBAR_WIDTH = 272;
 
@@ -26,10 +27,12 @@ export default function VendorSidebar({ onNavigate }) {
   const pathname = usePathname() || "/vendor";
   const vendorId = useSelector((s) => s.session.vendorId);
   const vendor = useSelector((s) => s.vendors.items.find((v) => v.id === vendorId));
+
+  const storeCategories = useSelector((s) => s.categories.items);
+  const nav = vendorNavFor(vendorVertical(vendor, storeCategories));
   const newInquiries = useSelector(
     (s) => s.inquiries.items.filter((q) => q.vendorId === vendorId && q.status === "New").length,
   );
-
   const badgeFor = (href) => (href === "/vendor/inquiries" ? newInquiries : 0);
 
   const renderItem = (item) => {
@@ -65,14 +68,14 @@ export default function VendorSidebar({ onNavigate }) {
       </Box>
 
       <Box sx={{ flex: 1, overflowY: "auto", px: 2, py: 1 }}>
-        <List disablePadding>{vendorNav.map(renderItem)}</List>
+        <List disablePadding>{nav.map(renderItem)}</List>
       </Box>
 
       <Box sx={{ p: 2 }}>
         <Box sx={{ p: 2, borderRadius: 3, background: "linear-gradient(135deg,#0ea5a4 0%,#2f6fed 100%)", color: "#fff" }}>
           <Typography variant="subtitle2" fontWeight={700}>Keep your calendar current</Typography>
           <Typography variant="caption" sx={{ opacity: 0.9, display: "block", mt: 0.5 }}>
-            Add your bookings so you never double-book a date.
+            Confirmed bookings block the date automatically.
           </Typography>
         </Box>
       </Box>

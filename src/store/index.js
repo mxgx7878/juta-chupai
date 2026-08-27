@@ -3,13 +3,13 @@ import {
   customersSlice,
   vendorsSlice,
   listingsSlice,
-  inquiriesSlice,
-  calendarSlice,
   citiesSlice,
   bannersSlice,
   notificationsSlice,
 } from "./entities";
 import categories, { categoriesActions as catActions } from "./categoriesSlice";
+import inquiries, { inquiriesActions as inqActions } from "./inquiriesSlice";
+import bookings, { bookingsActions as bkgActions } from "./bookingsSlice";
 import messages from "./messagesSlice";
 import ui from "./uiSlice";
 import session, { sessionActions as sessActions } from "./sessionSlice";
@@ -19,8 +19,8 @@ export const store = configureStore({
     customers: customersSlice.reducer,
     vendors: vendorsSlice.reducer,
     listings: listingsSlice.reducer,
-    inquiries: inquiriesSlice.reducer,
-    calendar: calendarSlice.reducer,
+    inquiries,
+    bookings,
     categories,
     cities: citiesSlice.reducer,
     banners: bannersSlice.reducer,
@@ -34,8 +34,8 @@ export const store = configureStore({
 export const customersActions = customersSlice.actions;
 export const vendorsActions = vendorsSlice.actions;
 export const listingsActions = listingsSlice.actions;
-export const inquiriesActions = inquiriesSlice.actions;
-export const calendarActions = calendarSlice.actions;
+export const inquiriesActions = inqActions;
+export const bookingsActions = bkgActions;
 export const citiesActions = citiesSlice.actions;
 export const bannersActions = bannersSlice.actions;
 export const notificationsActions = notificationsSlice.actions;

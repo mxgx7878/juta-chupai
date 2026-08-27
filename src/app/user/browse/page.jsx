@@ -1,128 +1,160 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useSelector } from "react-redux";
-import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import Chip from "@mui/material/Chip";
 import InputBase from "@mui/material/InputBase";
-import Select from "@mui/material/Select";
+import Chip from "@mui/material/Chip";
 import MenuItem from "@mui/material/MenuItem";
-import { alpha } from "@mui/material/styles";
+import TextField from "@mui/material/TextField";
+import Slider from "@mui/material/Slider";
+import Button from "@mui/material/Button";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
-import { CATEGORY_TREE, getCategory, TYPE_LABELS } from "@/config/categoryTree";
-import { CITY_OPTIONS } from "@/config/vendorCategories";
-import { priceLabel, typeChips, startingPrice } from "@/utils/listing";
+import ListingCard from "@/components/user/ListingCard";
+import { CITY_OPTIONS } from "@/config/cities";
+import { VERTICALS } from "@/config/categoryTree";
+import { startingPrice } from "@/utils/listing";
+import { pkr } from "@/utils/booking";
 
-const TYPE_COLORS = {
-  rent: { bg: "#e0edff", fg: "#1d4ed8" },
-  purchase: { bg: "#dcfce7", fg: "#15803d" },
-  service: { bg: "#ede9fe", fg: "#6d28d9" },
-};
+const TYPES = [
+  { id: "all", label: "Everything" },
+  { id: VERTICALS.HALL, label: "Venues & halls" },
+  { id: VERTICALS.CATERING, label: "Catering" },
+];
+const SORTS = [
+  { id: "featured", label: "Featured first" },
+  { id: "price-asc", label: "Price: low to high" },
+  { id: "price-desc", label: "Price: high to low" },
+  { id: "capacity", label: "Largest capacity" },
+];
 
-export default function BrowsePage() {
-  const router = useRouter();
-  const listings = useSelector((s) => s.listings.items.filter((l) => l.status === "Published"));
-  const vendors = useSelector((s) => s.vendors.items);
-  const vendorName = useMemo(() => Object.fromEntries(vendors.map((v) => [v.id, v.name])), [vendors]);
+function BrowseInner() {
+  const params = useSearchParams();
+  const allListings = useSelector((s) => s.listings.items);
 
+  const [type, setType] = useState(params.get("type") || "all");
+  const [city, setCity] = useState(params.get("city") || "all");
   const [q, setQ] = useState("");
-  const [cat, setCat] = useState("all");
-  const [type, setType] = useState("all");
-  const [city, setCity] = useState("all");
+  const [guests, setGuests] = useState("");
+  const [maxPrice, setMaxPrice] = useState(0);
   const [sort, setSort] = useState("featured");
 
-  useEffect(() => {
-    const c = new URLSearchParams(window.location.search).get("cat");
-    if (c) setCat(c);
-  }, []);
+  const published = useMemo(() => allListings.filter((l) => l.status === "Published"), [allListings]);
+
+  const priceCeiling = useMemo(() => {
+    const top = Math.max(0, ...published.filter((l) => l.vertical === VERTICALS.HALL).map(startingPrice));
+    return Math.ceil(top / 50000) * 50000 || 500000;
+  }, [published]);
 
   const rows = useMemo(() => {
-    const t = q.trim().toLowerCase();
-    let out = listings.filter((l) => {
-      const okCat = cat === "all" || l.categoryId === cat;
-      const okType = type === "all" || (l.types || []).includes(type);
-      const okCity = city === "all" || l.city === city;
-      const okQ = !t || l.title.toLowerCase().includes(t) || (vendorName[l.vendorId] || "").toLowerCase().includes(t);
-      return okCat && okType && okCity && okQ;
+    const term = q.trim().toLowerCase();
+    const g = Number(guests) || 0;
+
+    let out = published.filter((l) => {
+      if (type !== "all" && l.vertical !== type) return false;
+      if (city !== "all" && l.city !== city) return false;
+      if (term && !`${l.title} ${l.description} ${l.city}`.toLowerCase().includes(term)) return false;
+      if (g) {
+        const cap = l.vertical === VERTICALS.CATERING ? l.catering?.maxGuests : l.hall?.capacity;
+        const min = l.vertical === VERTICALS.CATERING ? l.catering?.minGuests : l.hall?.minGuests;
+        if (cap && g > cap) return false;
+        if (min && g < min) return false;
+      }
+      /* the price filter only makes sense against per-event hall rates */
+      if (maxPrice > 0 && l.vertical === VERTICALS.HALL && startingPrice(l) > maxPrice) return false;
+      return true;
     });
-    if (sort === "price-asc") out = [...out].sort((a, b) => (startingPrice(a) ?? Infinity) - (startingPrice(b) ?? Infinity));
-    else if (sort === "price-desc") out = [...out].sort((a, b) => (startingPrice(b) ?? -Infinity) - (startingPrice(a) ?? -Infinity));
-    else out = [...out].sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
+
+    out = [...out].sort((a, b) => {
+      if (sort === "price-asc") return startingPrice(a) - startingPrice(b);
+      if (sort === "price-desc") return startingPrice(b) - startingPrice(a);
+      if (sort === "capacity") {
+        const cap = (l) => (l.vertical === VERTICALS.CATERING ? l.catering?.maxGuests : l.hall?.capacity) || 0;
+        return cap(b) - cap(a);
+      }
+      return (b.featured ? 1 : 0) - (a.featured ? 1 : 0);
+    });
     return out;
-  }, [listings, q, cat, type, city, sort, vendorName]);
+  }, [published, type, city, q, guests, maxPrice, sort]);
+
+  const reset = () => { setType("all"); setCity("all"); setQ(""); setGuests(""); setMaxPrice(0); setSort("featured"); };
+  const filtersOn = type !== "all" || city !== "all" || q || guests || maxPrice > 0;
 
   return (
-    <Stack spacing={3}>
-      <Box>
-        <Typography variant="h4" fontWeight={800}>Browse listings</Typography>
-        <Typography color="text.secondary">{rows.length} listing{rows.length === 1 ? "" : "s"} available</Typography>
-      </Box>
+    <Box>
+      <Stack spacing={0.5} sx={{ mb: 3 }}>
+        <Typography variant="h4" fontWeight={800}>Browse</Typography>
+        <Typography color="text.secondary">Wedding venues and catering, ready to enquire.</Typography>
+      </Stack>
 
-      {/* Filters */}
-      <Card sx={{ p: 2 }}>
-        <Stack direction={{ xs: "column", md: "row" }} spacing={1.5} sx={{ flexWrap: "wrap" }}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1, px: 1.5, height: 40, flex: 1, minWidth: 200, borderRadius: 2, border: "1px solid", borderColor: "divider", bgcolor: "grey.50" }}>
+      <Card sx={{ p: { xs: 2, md: 2.5 }, mb: 3 }}>
+        <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", gap: 1, mb: 2 }}>
+          {TYPES.map((t) => (
+            <Chip key={t.id} label={t.label} onClick={() => setType(t.id)}
+              variant={type === t.id ? "filled" : "outlined"} color={type === t.id ? "primary" : "default"}
+              sx={{ fontWeight: 700 }} />
+          ))}
+        </Stack>
+
+        <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", lg: "2fr 1fr 1fr 1fr" }, alignItems: "center" }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, px: 1.5, height: 40, borderRadius: 2, border: "1px solid", borderColor: "divider", bgcolor: "grey.50" }}>
             <SearchRoundedIcon fontSize="small" sx={{ color: "text.secondary" }} />
-            <InputBase placeholder="Search listings or vendors…" value={q} onChange={(e) => setQ(e.target.value)} sx={{ fontSize: 14, flex: 1 }} />
+            <InputBase placeholder="Search by name or city…" value={q} onChange={(e) => setQ(e.target.value)} sx={{ fontSize: 14, flex: 1 }} />
           </Box>
-          <Select size="small" value={cat} onChange={(e) => setCat(e.target.value)} sx={{ minWidth: 180 }}>
-            <MenuItem value="all">All categories</MenuItem>
-            {CATEGORY_TREE.map((c) => <MenuItem key={c.id} value={c.id}>{c.emoji} {c.name}</MenuItem>)}
-          </Select>
-          <Select size="small" value={type} onChange={(e) => setType(e.target.value)} sx={{ minWidth: 130 }}>
-            <MenuItem value="all">All types</MenuItem>
-            <MenuItem value="rent">{TYPE_LABELS.rent}</MenuItem>
-            <MenuItem value="purchase">{TYPE_LABELS.purchase}</MenuItem>
-            <MenuItem value="service">{TYPE_LABELS.service}</MenuItem>
-          </Select>
-          <Select size="small" value={city} onChange={(e) => setCity(e.target.value)} sx={{ minWidth: 130 }}>
+          <TextField label="City" size="small" select value={city} onChange={(e) => setCity(e.target.value)}>
             <MenuItem value="all">All cities</MenuItem>
             {CITY_OPTIONS.map((c) => <MenuItem key={c} value={c}>{c}</MenuItem>)}
-          </Select>
-          <Select size="small" value={sort} onChange={(e) => setSort(e.target.value)} sx={{ minWidth: 150 }}>
-            <MenuItem value="featured">Featured first</MenuItem>
-            <MenuItem value="price-asc">Price: low to high</MenuItem>
-            <MenuItem value="price-desc">Price: high to low</MenuItem>
-          </Select>
-        </Stack>
+          </TextField>
+          <TextField label="Guests" size="small" type="number" placeholder="e.g. 350" value={guests} onChange={(e) => setGuests(e.target.value)} />
+          <TextField label="Sort by" size="small" select value={sort} onChange={(e) => setSort(e.target.value)}>
+            {SORTS.map((s) => <MenuItem key={s.id} value={s.id}>{s.label}</MenuItem>)}
+          </TextField>
+        </Box>
+
+        {type !== VERTICALS.CATERING && (
+          <Box sx={{ mt: 2.5, px: 1 }}>
+            <Stack direction="row" sx={{ justifyContent: "space-between" }}>
+              <Typography variant="caption" color="text.secondary">Max venue price per event</Typography>
+              <Typography variant="caption" fontWeight={700}>{maxPrice > 0 ? pkr(maxPrice) : "Any"}</Typography>
+            </Stack>
+            <Slider value={maxPrice} onChange={(_, v) => setMaxPrice(v)} min={0} max={priceCeiling} step={25000} />
+          </Box>
+        )}
+
+        {filtersOn && (
+          <Stack direction="row" sx={{ justifyContent: "flex-end", mt: 1 }}>
+            <Button size="small" color="inherit" onClick={reset}>Clear filters</Button>
+          </Stack>
+        )}
       </Card>
 
-      {/* Grid */}
-      {rows.length === 0 ? (
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+        {rows.length} listing{rows.length === 1 ? "" : "s"}
+      </Typography>
+
+      <Box sx={{ display: "grid", gap: 2.5, gridTemplateColumns: { xs: "1fr", sm: "repeat(2,1fr)", lg: "repeat(3,1fr)" } }}>
+        {rows.map((l) => <ListingCard key={l.id} listing={l} />)}
+      </Box>
+
+      {rows.length === 0 && (
         <Card sx={{ p: 6, textAlign: "center" }}>
-          <Typography color="text.secondary">No listings match your filters.</Typography>
+          <Typography color="text.secondary" sx={{ mb: 2 }}>Nothing matches those filters.</Typography>
+          <Button variant="outlined" color="inherit" onClick={reset}>Clear filters</Button>
         </Card>
-      ) : (
-        <Box sx={{ display: "grid", gap: 2.5, gridTemplateColumns: { xs: "1fr", sm: "repeat(2,1fr)", md: "repeat(3,1fr)" } }}>
-          {rows.map((l) => {
-            const c = getCategory(l.categoryId);
-            return (
-              <Card key={l.id} sx={{ overflow: "hidden", cursor: "pointer", transition: "0.15s", "&:hover": { boxShadow: 4, transform: "translateY(-2px)" } }} onClick={() => router.push(`/user/listing/${l.id}`)}>
-                <Box sx={{ height: 140, background: `linear-gradient(135deg, ${alpha(c?.color || "#4f46e5", 0.85)}, ${c?.color || "#7c3aed"})`, display: "flex", alignItems: "flex-end", justifyContent: "space-between", p: 1.5 }}>
-                  {l.featured ? <Chip label="Featured" size="small" sx={{ bgcolor: "rgba(255,255,255,0.9)", fontWeight: 700 }} /> : <span />}
-                  <Chip label={c?.emoji} size="small" sx={{ bgcolor: "rgba(255,255,255,0.85)" }} />
-                </Box>
-                <Box sx={{ p: 2 }}>
-                  <Typography variant="subtitle1" fontWeight={700} noWrap>{l.title}</Typography>
-                  <Typography variant="caption" color="text.secondary" noWrap sx={{ display: "block" }}>
-                    {vendorName[l.vendorId]} · {l.city}
-                  </Typography>
-                  <Stack direction="row" spacing={0.5} sx={{ mt: 1, flexWrap: "wrap", gap: 0.5 }}>
-                    {typeChips(l).map((tc) => (
-                      <Chip key={tc.type} label={tc.label} size="small" sx={{ fontWeight: 700, bgcolor: TYPE_COLORS[tc.type]?.bg, color: TYPE_COLORS[tc.type]?.fg }} />
-                    ))}
-                  </Stack>
-                  <Typography variant="subtitle1" fontWeight={800} color="primary.main" sx={{ mt: 1 }}>{priceLabel(l)}</Typography>
-                </Box>
-              </Card>
-            );
-          })}
-        </Box>
       )}
-    </Stack>
+    </Box>
+  );
+}
+
+export default function BrowsePage() {
+  return (
+    <Suspense fallback={null}>
+      <BrowseInner />
+    </Suspense>
   );
 }

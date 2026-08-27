@@ -21,7 +21,8 @@ import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 import AddPhotoAlternateRoundedIcon from "@mui/icons-material/AddPhotoAlternateRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import { CATEGORY_NAMES, CITY_OPTIONS, categoryMeta } from "@/config/vendorCategories";
+import { CITY_OPTIONS } from "@/config/cities";
+import { getCategoryByName } from "@/config/categoryTree";
 import CategoryIcon from "@/components/ui/CategoryIcon";
 
 const emptyPackage = () => ({ name: "", price: "", detail: "" });
@@ -30,7 +31,7 @@ function blankForm(vendor) {
   return {
     name: vendor?.name || "",
     owner: vendor?.owner || "",
-    category: vendor?.category || "Venues",
+    category: vendor?.category || "Wedding Venues",
     city: vendor?.city || "Lahore",
     experience: vendor?.experience || "",
     hours: vendor?.hours || "",
@@ -58,9 +59,8 @@ export default function VendorFormDialog({ open, vendor, onClose, onSubmit }) {
     if (open) setF(blankForm(vendor));
   }, [open, vendor]);
 
-  const meta = categoryMeta(f.category);
+  const categoryServices = (getCategoryByName(f.category)?.subcategories || []).map((x) => x.name);
   const set = (k, v) => setF((s) => ({ ...s, [k]: v }));
-  const setAttr = (k, v) => setF((s) => ({ ...s, attrs: { ...s.attrs, [k]: v } }));
 
   const setPackage = (i, k, v) =>
     setF((s) => ({ ...s, packages: s.packages.map((p, idx) => (idx === i ? { ...p, [k]: v } : p)) }));
@@ -90,7 +90,7 @@ export default function VendorFormDialog({ open, vendor, onClose, onSubmit }) {
         <Stack direction="row" spacing={0.75} sx={{ alignItems: "center", mt: 0.25 }}>
           <CategoryIcon category={f.category} fontSize="small" />
           <Typography variant="body2" color="text.secondary">
-            {f.category} vendor · form adapts to the category
+            {f.category} vendor · storefront details
           </Typography>
         </Stack>
       </DialogTitle>
@@ -120,67 +120,13 @@ export default function VendorFormDialog({ open, vendor, onClose, onSubmit }) {
           <TextField label="Business hours" size="small" placeholder="e.g. 10 AM – 11 PM" value={f.hours} onChange={(e) => set("hours", e.target.value)} />
         </Box>
 
-        {/* Category-specific fields */}
-        {meta.fields.length > 0 && (
-          <>
-            <SectionLabel>{f.category} details</SectionLabel>
-            <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, mt: 1 }}>
-              {meta.fields.map((field) => {
-                if (field.type === "multiselect") {
-                  return (
-                    <Autocomplete
-                      key={field.name}
-                      multiple
-                      size="small"
-                      options={field.options}
-                      value={f.attrs[field.name] || []}
-                      onChange={(_, v) => setAttr(field.name, v)}
-                      renderInput={(params) => <TextField {...params} label={field.label} />}
-                      sx={{ gridColumn: { sm: "1 / -1" } }}
-                    />
-                  );
-                }
-                if (field.type === "select") {
-                  return (
-                    <TextField
-                      key={field.name}
-                      label={field.label}
-                      size="small"
-                      select
-                      value={f.attrs[field.name] || ""}
-                      onChange={(e) => setAttr(field.name, e.target.value)}
-                    >
-                      {field.options.map((o) => (
-                        <MenuItem key={o} value={o}>
-                          {o}
-                        </MenuItem>
-                      ))}
-                    </TextField>
-                  );
-                }
-                return (
-                  <TextField
-                    key={field.name}
-                    label={field.label}
-                    size="small"
-                    type={field.type === "number" ? "number" : "text"}
-                    value={f.attrs[field.name] || ""}
-                    onChange={(e) => setAttr(field.name, e.target.value)}
-                    slotProps={field.suffix ? { input: { endAdornment: <InputAdornment position="end">{field.suffix}</InputAdornment> } } : undefined}
-                  />
-                );
-              })}
-            </Box>
-          </>
-        )}
-
         {/* Services */}
         <SectionLabel>Services offered</SectionLabel>
         <Autocomplete
           multiple
           freeSolo
           size="small"
-          options={meta.services}
+          options={categoryServices}
           value={f.services}
           onChange={(_, v) => set("services", v)}
           renderInput={(params) => <TextField {...params} placeholder="Add a service and press Enter" sx={{ mt: 1 }} />}

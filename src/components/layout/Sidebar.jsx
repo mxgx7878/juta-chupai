@@ -27,9 +27,8 @@ export default function Sidebar({ onNavigate }) {
 
   const messagesBadge = useSelector((s) => s.messages.conversations.reduce((a, c) => a + (c.unread || 0), 0));
   const vendorsBadge = useSelector((s) => s.vendors.items.filter((v) => v.status === "Pending").length);
-  const inquiriesBadge = useSelector((s) => s.inquiries.items.filter((q) => q.status === "New").length);
   const badgeFor = (href) =>
-    ({ "/messages": messagesBadge, "/vendors": vendorsBadge, "/inquiries": inquiriesBadge }[href]) || 0;
+    ({ "/messages": messagesBadge, "/vendors": vendorsBadge }[href]) || 0;
 
   const renderItem = (item) => {
     const Icon = item.icon;

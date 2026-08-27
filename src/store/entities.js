@@ -1,5 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import * as data from "@/data/screens";
+import { listings as listingSeed } from "@/data/marketplace";
 
 /* Generic CRUD slice factory so every entity behaves the same. */
 function entity(name, initial, idKey) {
@@ -29,12 +30,11 @@ function entity(name, initial, idKey) {
   });
 }
 
+/* Inquiries and bookings have their own slices (they carry extra actions).
+   Listings are plain CRUD, so they use the factory. */
 export const customersSlice = entity("customers", data.customers, "email");
 export const vendorsSlice = entity("vendors", data.vendors, "id");
-export const listingsSlice = entity("listings", data.listings, "id");
-export const inquiriesSlice = entity("inquiries", data.inquiries, "id");
-export const calendarSlice = entity("calendar", data.calendarEntries, "id");
-export const categoriesSlice = entity("categories", data.categories, "name");
+export const listingsSlice = entity("listings", listingSeed, "id");
 export const citiesSlice = entity("cities", data.cities, "name");
 export const bannersSlice = entity("banners", data.banners, "title");
 export const notificationsSlice = entity("notifications", data.notificationsSent, "title");

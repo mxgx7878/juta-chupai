@@ -45,12 +45,12 @@ export default function VendorApprovals() {
         >
           <Avatar
             variant="rounded"
-            onClick={() => router.push(`/vendors/${v.id}`)}
+            onClick={() => router.push(`/admin/vendors/${v.id}`)}
             sx={{ bgcolor: AV[i % AV.length], borderRadius: 2, cursor: "pointer" }}
           >
             {initials(v.name)}
           </Avatar>
-          <Box sx={{ minWidth: 0, flex: 1, cursor: "pointer" }} onClick={() => router.push(`/vendors/${v.id}`)}>
+          <Box sx={{ minWidth: 0, flex: 1, cursor: "pointer" }} onClick={() => router.push(`/admin/vendors/${v.id}`)}>
             <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
               <Typography variant="subtitle2" noWrap fontWeight={700}>
                 {v.name}

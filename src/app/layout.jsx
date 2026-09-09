@@ -3,8 +3,8 @@ import "./globals.css";
 import Providers from "./providers";
 
 export const metadata = {
-  title: "Joota Chupai — Admin",
-  description: "Event marketplace administration dashboard",
+  title: "Joota Chupai — Pakistan Wedding Marketplace",
+  description: "Discover wedding venues, caterers and trusted event vendors across Pakistan.",
 };
 
 export default function RootLayout({ children }) {

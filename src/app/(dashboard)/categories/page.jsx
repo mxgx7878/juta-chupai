@@ -45,7 +45,6 @@ const FILTER_VERTICAL = [null, VERTICALS.HALL, VERTICALS.CATERING, VERTICALS.GEN
 
 const emptyForm = {
   name: "",
-  emoji: "\u{1F389}",
   iconKey: "celebration",
   color: CATEGORY_COLORS[0],
   vertical: VERTICALS.GENERIC,
@@ -81,7 +80,6 @@ export default function CategoriesPage() {
   const openEdit = (c) => {
     setForm({
       name: c.name,
-      emoji: c.emoji || "\u{1F389}",
       iconKey: c.iconKey,
       color: c.color,
       vertical: c.vertical || VERTICALS.GENERIC,
@@ -94,13 +92,13 @@ export default function CategoriesPage() {
     const name = form.name.trim();
     if (dialog.edit) {
       dispatch(categoriesActions.update({
-        name: dialog.edit.name, emoji: form.emoji, iconKey: form.iconKey, color: form.color, vertical: form.vertical,
+        name: dialog.edit.name, iconKey: form.iconKey, color: form.color, vertical: form.vertical,
       }));
       dispatch(notify(`\u201C${name}\u201D updated`));
     } else {
       const id = uniqueSlug(name, categories.map((c) => c.id));
       dispatch(categoriesActions.add({
-        id, name, emoji: form.emoji, iconKey: form.iconKey, color: form.color, vertical: form.vertical, subcategories: [],
+        id, name, iconKey: form.iconKey, color: form.color, vertical: form.vertical, subcategories: [],
       }));
       dispatch(notify(`Category \u201C${name}\u201D created`));
     }
@@ -133,7 +131,7 @@ export default function CategoriesPage() {
             <Card key={c.id} sx={{ p: { xs: 2, md: 3 } }}>
               <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
                 <Avatar variant="rounded" sx={{ width: 52, height: 52, borderRadius: 3, bgcolor: alpha(c.color, 0.14), color: c.color }}>
-                  {c.emoji ? <Box sx={{ fontSize: 24 }}>{c.emoji}</Box> : <Icon />}
+                  <Icon />
                 </Avatar>
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
@@ -191,8 +189,7 @@ export default function CategoriesPage() {
       <Dialog open={dialog.open} onClose={close} fullWidth maxWidth="sm">
         <DialogTitle sx={{ fontWeight: 700 }}>{dialog.edit ? `Edit \u2014 ${dialog.edit.name}` : "Add category"}</DialogTitle>
         <DialogContent dividers>
-          <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: "80px 1fr", mt: 1 }}>
-            <TextField label="Emoji" size="small" value={form.emoji} onChange={(e) => setForm((f) => ({ ...f, emoji: e.target.value }))} />
+          <Box sx={{ mt: 1 }}>
             <TextField label="Category name" size="small" value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} disabled={Boolean(dialog.edit)} helperText={dialog.edit ? "Renaming isn't supported here" : " "} />
           </Box>
 

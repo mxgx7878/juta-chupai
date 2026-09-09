@@ -132,7 +132,7 @@ export default function BudgetPlannerPage() {
             return (
               <Stack key={c.id} direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
                 <Avatar variant="rounded" sx={{ width: 38, height: 38, borderRadius: 2, bgcolor: alpha(c.color, 0.14), color: c.color }}>
-                  {c.emoji ? <Box sx={{ fontSize: 18 }}>{c.emoji}</Box> : <Icon fontSize="small" />}
+                  <Icon fontSize="small" />
                 </Avatar>
                 <TextField
                   label={c.name} size="small" type="number" fullWidth

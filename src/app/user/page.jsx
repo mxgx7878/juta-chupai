@@ -92,7 +92,7 @@ export default function UserHomePage() {
               <Card key={c.id} onClick={() => router.push("/user/browse")}
                 sx={{ p: 2.5, textAlign: "center", cursor: "pointer", "&:hover": { boxShadow: 4 } }}>
                 <Avatar variant="rounded" sx={{ width: 46, height: 46, borderRadius: 2, mx: "auto", mb: 1, bgcolor: alpha(c.color, 0.14), color: c.color }}>
-                  {c.emoji ? <Box sx={{ fontSize: 22 }}>{c.emoji}</Box> : <Icon />}
+                  <Icon />
                 </Avatar>
                 <Typography variant="subtitle2" fontWeight={700}>{c.name}</Typography>
                 <Typography variant="caption" color="text.secondary">{n} listing{n === 1 ? "" : "s"}</Typography>

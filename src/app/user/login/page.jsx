@@ -16,7 +16,12 @@ export default function UserLoginPage() {
   const router = useRouter();
   const dispatch = useDispatch();
   const customers = useSelector((s) => s.customers.items.filter((c) => c.status === "Active"));
-  const signIn = (email) => { dispatch(sessionActions.loginCustomer(email)); router.push("/user"); };
+  const signIn = (email) => {
+    dispatch(sessionActions.loginCustomer(email));
+    const next = new URLSearchParams(window.location.search).get("next");
+    const safeNext = next?.startsWith("/") && !next.startsWith("//") ? next : "/user";
+    router.push(safeNext);
+  };
 
   return (
     <Box sx={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", p: 3, background: "linear-gradient(135deg,#eef2ff,#faf5ff)" }}>

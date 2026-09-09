@@ -1,27 +1,71 @@
 "use client";
 
-import { useState } from "react";
-import Box from "@mui/material/Box";
-import Drawer from "@mui/material/Drawer";
-import VendorSidebar, { SIDEBAR_WIDTH } from "./VendorSidebar";
-import VendorTopbar from "./VendorTopbar";
-import GlobalSnackbar from "@/components/ui/GlobalSnackbar";
+import { useRouter } from "next/navigation";
+import { useDispatch, useSelector } from "react-redux";
+import StorefrontRoundedIcon from "@mui/icons-material/StorefrontRounded";
+import PortalShell from "@/components/layout/PortalShell";
+import { accountSwitcherMenuItems } from "@/components/layout/AccountSwitcherMenu";
+import { vendorNavFor } from "@/config/vendorNav";
+import { vendorVertical } from "@/utils/vertical";
+import { sessionActions } from "@/store";
+import { notify } from "@/store/uiSlice";
 
 export default function VendorShell({ children }) {
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const router = useRouter();
+  const dispatch = useDispatch();
+  const vendorId = useSelector((state) => state.session.vendorId);
+  const vendors = useSelector((state) => state.vendors.items);
+  const categories = useSelector((state) => state.categories.items);
+  const inquiries = useSelector((state) => state.inquiries.items);
+  const vendor = vendors.find((item) => item.id === vendorId);
+  const nav = vendorNavFor(vendorVertical(vendor, categories));
+  const newInquiries = inquiries.filter((item) => item.vendorId === vendorId && item.status === "New").length;
+
+  const switchTo = (id) => {
+    dispatch(sessionActions.loginAs(id));
+    dispatch(notify(`Now acting as ${vendors.find((item) => item.id === id)?.name}`));
+    router.push("/vendor");
+  };
+
+  const logout = () => {
+    dispatch(sessionActions.logout());
+    router.push("/vendor/login");
+  };
+
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "background.default" }}>
-      <Drawer variant="permanent" sx={{ display: { xs: "none", md: "block" }, width: SIDEBAR_WIDTH, flexShrink: 0, [`& .MuiDrawer-paper`]: { width: SIDEBAR_WIDTH, boxSizing: "border-box", border: "none" } }}>
-        <VendorSidebar />
-      </Drawer>
-      <Drawer variant="temporary" open={mobileOpen} onClose={() => setMobileOpen(false)} ModalProps={{ keepMounted: true }} sx={{ display: { xs: "block", md: "none" }, [`& .MuiDrawer-paper`]: { width: SIDEBAR_WIDTH, boxSizing: "border-box", border: "none" } }}>
-        <VendorSidebar onNavigate={() => setMobileOpen(false)} />
-      </Drawer>
-      <Box sx={{ flexGrow: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
-        <VendorTopbar onMenuClick={() => setMobileOpen(true)} />
-        <Box component="main" sx={{ flexGrow: 1, p: { xs: 2, md: 3 } }}>{children}</Box>
-      </Box>
-      <GlobalSnackbar />
-    </Box>
+    <PortalShell
+      sidebar={{
+        navGroups: [{ label: "Workspace", items: nav }],
+        badgeFor: (href) => (href === "/vendor/inquiries" ? newInquiries : 0),
+        BrandIcon: StorefrontRoundedIcon,
+        brandColor: "secondary.main",
+        brandLabel: "VENDOR PORTAL",
+        context: { label: "Signed in as", value: vendor?.name || "—" },
+        promo: {
+          title: "Keep your calendar current",
+          description: "Confirmed bookings block the date automatically.",
+          background: "linear-gradient(135deg,#0ea5a4 0%,#2f6fed 100%)",
+        },
+      }}
+      topbar={{
+        title: "Vendor Portal",
+        account: {
+          name: vendor?.name || "Select vendor",
+          subtitle: vendor?.city || "Vendor account",
+          initials: vendor?.name?.[0] || "?",
+          color: "secondary.main",
+        },
+        renderAccountMenu: (close) =>
+          accountSwitcherMenuItems({
+            label: "Switch vendor (mock)",
+            items: vendors.filter((item) => item.status === "Approved").map((item) => ({ id: item.id, label: item.name })),
+            activeId: vendorId,
+            onSelect: (id) => { close(); switchTo(id); },
+            onLogout: () => { close(); logout(); },
+          }),
+      }}
+    >
+      {children}
+    </PortalShell>
   );
 }

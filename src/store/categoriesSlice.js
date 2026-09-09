@@ -7,7 +7,6 @@ import { CATEGORY_TREE, VERTICALS } from "@/config/categoryTree";
 const seed = CATEGORY_TREE.map((c) => ({
   id: c.id,
   name: c.name,
-  emoji: c.emoji,
   iconKey: c.iconKey,
   color: c.color,
   vertical: c.vertical,
@@ -27,7 +26,6 @@ const categoriesSlice = createSlice({
       if (s.items.some((c) => c.name.toLowerCase() === a.payload.name.toLowerCase())) return;
       s.items.push({
         id: a.payload.id || subSlug("cat", a.payload.name),
-        emoji: a.payload.emoji || "\u{1F389}",
         iconKey: a.payload.iconKey || "celebration",
         color: a.payload.color || "#4f46e5",
         vertical: a.payload.vertical || VERTICALS.GENERIC,

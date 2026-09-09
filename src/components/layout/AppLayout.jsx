@@ -23,7 +23,7 @@ export default function AppLayout({ children }) {
     state.vendors.items.filter((vendor) => vendor.status === "Pending").length,
   );
 
-  const badgeFor = (href) => ({ "/messages": messagesBadge, "/vendors": vendorsBadge })[href] || 0;
+  const badgeFor = (href) => ({ "/admin/messages": messagesBadge, "/admin/vendors": vendorsBadge })[href] || 0;
 
   return (
     <PortalShell
@@ -43,16 +43,16 @@ export default function AppLayout({ children }) {
         search: {
           placeholder: "Search vendors… (press Enter)",
           ariaLabel: "Search vendors",
-          onSubmit: (query) => router.push(`/vendors?q=${encodeURIComponent(query)}`),
+          onSubmit: (query) => router.push(`/admin/vendors?q=${encodeURIComponent(query)}`),
         },
-        notificationPath: "/notifications",
+        notificationPath: "/admin/notifications",
         account: { name: "Ayesha Yusuf", subtitle: "Platform admin", initials: "AY" },
         renderAccountMenu: (close) => [
           <MenuItem key="profile" onClick={() => { close(); dispatch(notify("Opening profile…")); }}>
             <ListItemIcon><PersonRoundedIcon fontSize="small" /></ListItemIcon>
             Profile
           </MenuItem>,
-          <MenuItem key="settings" onClick={() => { close(); router.push("/settings"); }}>
+          <MenuItem key="settings" onClick={() => { close(); router.push("/admin/settings"); }}>
             <ListItemIcon><SettingsRoundedIcon fontSize="small" /></ListItemIcon>
             Settings
           </MenuItem>,

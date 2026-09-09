@@ -14,7 +14,7 @@ import { getCategory, VERTICALS } from "@/config/categoryTree";
 import { getCategoryIcon } from "@/config/categoryIcons";
 import { priceLabel, capacityLabel, facts } from "@/utils/listing";
 
-export default function ListingCard({ listing }) {
+export default function ListingCard({ listing, hrefBase = "/user/listing" }) {
   const router = useRouter();
   const cat = getCategory(listing.categoryId);
   const Icon = getCategoryIcon(cat?.iconKey);
@@ -25,7 +25,7 @@ export default function ListingCard({ listing }) {
 
   return (
     <Card
-      onClick={() => router.push(`/user/listing/${listing.id}`)}
+      onClick={() => router.push(`${hrefBase}/${listing.id}`)}
       sx={{ overflow: "hidden", cursor: "pointer", transition: "0.15s", display: "flex", flexDirection: "column", "&:hover": { boxShadow: 5, transform: "translateY(-2px)" } }}
     >
       <Box sx={{ height: 120, position: "relative", background: `linear-gradient(135deg, ${alpha(color, 0.85)}, ${color})`, display: "flex", alignItems: "center", justifyContent: "center" }}>

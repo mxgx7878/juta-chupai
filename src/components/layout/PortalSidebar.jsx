@@ -17,7 +17,7 @@ export const SIDEBAR_WIDTH = 272;
 
 function isActive(pathname, href) {
   if (href === "/") return pathname === "/";
-  if (href === "/user" || href === "/vendor") return pathname === href;
+  if (href === "/admin" || href === "/user" || href === "/vendor") return pathname === href;
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 

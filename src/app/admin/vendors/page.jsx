@@ -136,7 +136,7 @@ function VendorsContent() {
                         {initials(v.name)}
                       </Avatar>
                       <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
-                        <MuiLink component={Link} href={`/vendors/${v.id}`} underline="hover" sx={{ fontWeight: 700, color: "text.primary" }}>
+                        <MuiLink component={Link} href={`/admin/vendors/${v.id}`} underline="hover" sx={{ fontWeight: 700, color: "text.primary" }}>
                           {v.name}
                         </MuiLink>
                         {v.verified && (
@@ -177,7 +177,7 @@ function VendorsContent() {
                       )}
                       <RowMenu
                         actions={[
-                          { label: "View profile", icon: <VisibilityRoundedIcon fontSize="small" />, onClick: () => { window.location.href = `/vendors/${v.id}`; } },
+                          { label: "View profile", icon: <VisibilityRoundedIcon fontSize="small" />, onClick: () => { window.location.href = `/admin/vendors/${v.id}`; } },
                           { label: "Edit", icon: <EditRoundedIcon fontSize="small" />, onClick: () => setDialog({ open: true, vendor: v }) },
                           { label: "Delete", icon: <DeleteOutlineRoundedIcon fontSize="small" />, danger: true, onClick: () => { dispatch(vendorsActions.remove(v.id)); dispatch(notify({ message: "Vendor deleted", severity: "info" })); } },
                         ]}

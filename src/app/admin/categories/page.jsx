@@ -172,7 +172,7 @@ export default function CategoriesPage() {
               </Stack>
               <AddSub onAdd={(name) => { dispatch(categoriesActions.addSubcategory({ category: c.name, name })); dispatch(notify(`\u201C${name}\u201D added`)); }} />
 
-              <Button fullWidth variant="outlined" color="inherit" endIcon={<ArrowForwardRoundedIcon />} sx={{ mt: 2.5 }} onClick={() => router.push(`/vendors?cat=${encodeURIComponent(c.name)}`)}>
+              <Button fullWidth variant="outlined" color="inherit" endIcon={<ArrowForwardRoundedIcon />} sx={{ mt: 2.5 }} onClick={() => router.push(`/admin/vendors?cat=${encodeURIComponent(c.name)}`)}>
                 View {c.name} vendors
               </Button>
             </Card>

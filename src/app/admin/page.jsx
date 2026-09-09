@@ -136,7 +136,7 @@ export default function DashboardPage() {
             <Button
               variant="contained"
               startIcon={<EventAvailableRoundedIcon />}
-              onClick={() => router.push("/vendors")}
+              onClick={() => router.push("/admin/vendors")}
               sx={{ bgcolor: "#fff", color: "primary.main", "&:hover": { bgcolor: "#f1f1f8" } }}
             >
               Review approvals
@@ -144,7 +144,7 @@ export default function DashboardPage() {
             <Button
               variant="outlined"
               endIcon={<ArrowForwardRoundedIcon />}
-              onClick={() => router.push("/reports")}
+              onClick={() => router.push("/admin/reports")}
               sx={{ color: "#fff", borderColor: "rgba(255,255,255,0.4)" }}
             >
               View reports
@@ -186,7 +186,7 @@ export default function DashboardPage() {
         <SectionCard
           title="Vendor approvals"
           subtitle="New applications awaiting review"
-          action={<Button size="small" color="inherit" onClick={() => router.push("/vendors")}>Review all</Button>}
+          action={<Button size="small" color="inherit" onClick={() => router.push("/admin/vendors")}>Review all</Button>}
         >
           <VendorApprovals />
         </SectionCard>

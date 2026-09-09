@@ -62,7 +62,7 @@ export default function VendorDetailPage() {
   if (!vendor) {
     return (
       <Box>
-        <Button startIcon={<ArrowBackRoundedIcon />} color="inherit" onClick={() => router.push("/vendors")}>
+        <Button startIcon={<ArrowBackRoundedIcon />} color="inherit" onClick={() => router.push("/admin/vendors")}>
           Back to vendors
         </Button>
         <Card sx={{ p: 6, mt: 2, textAlign: "center" }}>
@@ -79,7 +79,7 @@ export default function VendorDetailPage() {
   return (
     <Box>
       <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-        <Button startIcon={<ArrowBackRoundedIcon />} color="inherit" onClick={() => router.push("/vendors")}>
+        <Button startIcon={<ArrowBackRoundedIcon />} color="inherit" onClick={() => router.push("/admin/vendors")}>
           Vendors
         </Button>
         <Stack direction="row" spacing={1}>

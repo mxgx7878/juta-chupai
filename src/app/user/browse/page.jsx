@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { Suspense, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import Stack from "@mui/material/Stack";
@@ -18,72 +17,31 @@ import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import ListingCard from "@/components/user/ListingCard";
 import { CITY_OPTIONS } from "@/config/cities";
 import { VERTICALS } from "@/config/categoryTree";
-import { startingPrice } from "@/utils/listing";
 import { pkr } from "@/utils/booking";
+import {
+  EMPTY_FILTERS, LISTING_SORTS, LISTING_TYPES,
+  activeFilterCount, onlyPublished, priceCeiling, queryListings,
+} from "@/utils/listingFilters";
 
-const TYPES = [
-  { id: "all", label: "Everything" },
-  { id: VERTICALS.HALL, label: "Venues & halls" },
-  { id: VERTICALS.CATERING, label: "Catering" },
-];
-const SORTS = [
-  { id: "featured", label: "Featured first" },
-  { id: "price-asc", label: "Price: low to high" },
-  { id: "price-desc", label: "Price: high to low" },
-  { id: "capacity", label: "Largest capacity" },
-];
-
+/* Signed-in browse. Search/filter/sort behaviour is shared with the public
+   explorer through utils/listingFilters so the two can never drift apart. */
 function BrowseInner() {
   const params = useSearchParams();
-  const allListings = useSelector((s) => s.listings.items);
+  const listings = useSelector((s) => s.listings.items);
 
-  const [type, setType] = useState(params.get("type") || "all");
-  const [city, setCity] = useState(params.get("city") || "all");
-  const [q, setQ] = useState("");
-  const [guests, setGuests] = useState("");
-  const [maxPrice, setMaxPrice] = useState(0);
-  const [sort, setSort] = useState("featured");
+  const [filters, setFilters] = useState({
+    ...EMPTY_FILTERS,
+    type: params.get("type") || "all",
+    city: params.get("city") || "all",
+  });
 
-  const published = useMemo(() => allListings.filter((l) => l.status === "Published"), [allListings]);
+  const set = (key, value) => setFilters((f) => ({ ...f, [key]: value }));
+  const reset = () => setFilters(EMPTY_FILTERS);
 
-  const priceCeiling = useMemo(() => {
-    const top = Math.max(0, ...published.filter((l) => l.vertical === VERTICALS.HALL).map(startingPrice));
-    return Math.ceil(top / 50000) * 50000 || 500000;
-  }, [published]);
-
-  const rows = useMemo(() => {
-    const term = q.trim().toLowerCase();
-    const g = Number(guests) || 0;
-
-    let out = published.filter((l) => {
-      if (type !== "all" && l.vertical !== type) return false;
-      if (city !== "all" && l.city !== city) return false;
-      if (term && !`${l.title} ${l.description} ${l.city}`.toLowerCase().includes(term)) return false;
-      if (g) {
-        const cap = l.vertical === VERTICALS.CATERING ? l.catering?.maxGuests : l.hall?.capacity;
-        const min = l.vertical === VERTICALS.CATERING ? l.catering?.minGuests : l.hall?.minGuests;
-        if (cap && g > cap) return false;
-        if (min && g < min) return false;
-      }
-      /* the price filter only makes sense against per-event hall rates */
-      if (maxPrice > 0 && l.vertical === VERTICALS.HALL && startingPrice(l) > maxPrice) return false;
-      return true;
-    });
-
-    out = [...out].sort((a, b) => {
-      if (sort === "price-asc") return startingPrice(a) - startingPrice(b);
-      if (sort === "price-desc") return startingPrice(b) - startingPrice(a);
-      if (sort === "capacity") {
-        const cap = (l) => (l.vertical === VERTICALS.CATERING ? l.catering?.maxGuests : l.hall?.capacity) || 0;
-        return cap(b) - cap(a);
-      }
-      return (b.featured ? 1 : 0) - (a.featured ? 1 : 0);
-    });
-    return out;
-  }, [published, type, city, q, guests, maxPrice, sort]);
-
-  const reset = () => { setType("all"); setCity("all"); setQ(""); setGuests(""); setMaxPrice(0); setSort("featured"); };
-  const filtersOn = type !== "all" || city !== "all" || q || guests || maxPrice > 0;
+  const published = useMemo(() => onlyPublished(listings), [listings]);
+  const ceiling = useMemo(() => priceCeiling(published), [published]);
+  const rows = useMemo(() => queryListings(listings, filters), [listings, filters]);
+  const filtersOn = activeFilterCount(filters) > 0;
 
   return (
     <Box>
@@ -94,9 +52,9 @@ function BrowseInner() {
 
       <Card sx={{ p: { xs: 2, md: 2.5 }, mb: 3 }}>
         <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", gap: 1, mb: 2 }}>
-          {TYPES.map((t) => (
-            <Chip key={t.id} label={t.label} onClick={() => setType(t.id)}
-              variant={type === t.id ? "filled" : "outlined"} color={type === t.id ? "primary" : "default"}
+          {LISTING_TYPES.map((t) => (
+            <Chip key={t.id} label={t.label} onClick={() => set("type", t.id)}
+              variant={filters.type === t.id ? "filled" : "outlined"} color={filters.type === t.id ? "primary" : "default"}
               sx={{ fontWeight: 700 }} />
           ))}
         </Stack>
@@ -104,25 +62,25 @@ function BrowseInner() {
         <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", lg: "2fr 1fr 1fr 1fr" }, alignItems: "center" }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, px: 1.5, height: 40, borderRadius: 2, border: "1px solid", borderColor: "divider", bgcolor: "grey.50" }}>
             <SearchRoundedIcon fontSize="small" sx={{ color: "text.secondary" }} />
-            <InputBase placeholder="Search by name or city…" value={q} onChange={(e) => setQ(e.target.value)} sx={{ fontSize: 14, flex: 1 }} />
+            <InputBase placeholder="Search by name or city…" value={filters.q} onChange={(e) => set("q", e.target.value)} sx={{ fontSize: 14, flex: 1 }} />
           </Box>
-          <TextField label="City" size="small" select value={city} onChange={(e) => setCity(e.target.value)}>
+          <TextField label="City" size="small" select value={filters.city} onChange={(e) => set("city", e.target.value)}>
             <MenuItem value="all">All cities</MenuItem>
             {CITY_OPTIONS.map((c) => <MenuItem key={c} value={c}>{c}</MenuItem>)}
           </TextField>
-          <TextField label="Guests" size="small" type="number" placeholder="e.g. 350" value={guests} onChange={(e) => setGuests(e.target.value)} />
-          <TextField label="Sort by" size="small" select value={sort} onChange={(e) => setSort(e.target.value)}>
-            {SORTS.map((s) => <MenuItem key={s.id} value={s.id}>{s.label}</MenuItem>)}
+          <TextField label="Guests" size="small" type="number" placeholder="e.g. 350" value={filters.guests} onChange={(e) => set("guests", e.target.value)} />
+          <TextField label="Sort by" size="small" select value={filters.sort} onChange={(e) => set("sort", e.target.value)}>
+            {LISTING_SORTS.map((s) => <MenuItem key={s.id} value={s.id}>{s.label}</MenuItem>)}
           </TextField>
         </Box>
 
-        {type !== VERTICALS.CATERING && (
+        {filters.type !== VERTICALS.CATERING && (
           <Box sx={{ mt: 2.5, px: 1 }}>
             <Stack direction="row" sx={{ justifyContent: "space-between" }}>
               <Typography variant="caption" color="text.secondary">Max venue price per event</Typography>
-              <Typography variant="caption" fontWeight={700}>{maxPrice > 0 ? pkr(maxPrice) : "Any"}</Typography>
+              <Typography variant="caption" fontWeight={700}>{filters.maxPrice > 0 ? pkr(filters.maxPrice) : "Any"}</Typography>
             </Stack>
-            <Slider value={maxPrice} onChange={(_, v) => setMaxPrice(v)} min={0} max={priceCeiling} step={25000} />
+            <Slider value={filters.maxPrice} onChange={(_, v) => set("maxPrice", v)} min={0} max={ceiling} step={25000} />
           </Box>
         )}
 

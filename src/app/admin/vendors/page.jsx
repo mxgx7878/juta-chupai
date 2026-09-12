@@ -136,7 +136,7 @@ function VendorsContent() {
                         {initials(v.name)}
                       </Avatar>
                       <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
-                        <MuiLink component={Link} href={`/vendors/${v.id}`} underline="hover" sx={{ fontWeight: 700, color: "text.primary" }}>
+                        <MuiLink component={Link} href={`/admin/vendors/${v.id}`} underline="hover" sx={{ fontWeight: 700, color: "text.primary" }}>
                           {v.name}
                         </MuiLink>
                         {v.verified && (

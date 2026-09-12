@@ -1,122 +1,136 @@
 "use client";
 
 import { createTheme } from "@mui/material/styles";
+import { colors, radii, shadows, motion, withAlpha } from "./tokens";
 
-// Clean, premium admin palette (soft grays, indigo primary, teal accent).
+/* The MUI theme is *derived* from tokens.js — never hard-code a colour here.
+   Admin, vendor portal and the public site all render through this theme, so
+   one token change repaints the entire product. */
 const theme = createTheme({
   cssVariables: true,
   palette: {
     mode: "light",
     primary: {
-      main: "#4f46e5",
-      light: "#6366f1",
-      dark: "#3730a3",
-      contrastText: "#ffffff",
+      main: colors.primary,
+      light: colors.primaryLight,
+      dark: colors.primaryDark,
+      contrastText: colors.primaryContrast,
     },
     secondary: {
-      main: "#0ea5a4",
-      light: "#2dd4bf",
-      dark: "#0f766e",
-      contrastText: "#ffffff",
+      main: colors.secondary,
+      light: colors.secondaryLight,
+      dark: colors.secondaryDark,
+      contrastText: colors.secondaryContrast,
     },
-    success: { main: "#22a06b", light: "#e7f6ee" },
-    warning: { main: "#d99400", light: "#fbf1dc" },
-    error: { main: "#e5484d", light: "#fdecec" },
-    info: { main: "#2f6fed", light: "#e6efff" },
-    background: {
-      default: "#f6f7fb",
-      paper: "#ffffff",
-    },
+    success: { main: colors.success, light: colors.successSoft },
+    warning: { main: colors.warning, light: colors.warningSoft },
+    error: { main: colors.error, light: colors.errorSoft },
+    info: { main: colors.info, light: colors.infoSoft },
+    background: { default: colors.canvas, paper: colors.surface },
     text: {
-      primary: "#1c252e",
-      secondary: "#637381",
+      primary: colors.textPrimary,
+      secondary: colors.textSecondary,
+      disabled: colors.textDisabled,
     },
-    divider: "rgba(145,158,171,0.20)",
+    divider: colors.divider,
     grey: {
-      50: "#f9fafb",
-      100: "#f4f6f8",
-      200: "#eceff2",
-      300: "#dfe3e8",
-      500: "#919eab",
-      700: "#454f5b",
-      900: "#1c252e",
+      50: colors.surfaceSubtle,
+      100: colors.surfaceMuted,
+      200: colors.border,
+      300: colors.borderStrong,
+      500: colors.textDisabled,
+      700: colors.textSecondary,
+      900: colors.textPrimary,
     },
   },
-  shape: { borderRadius: 12 },
+  shape: { borderRadius: radii.md },
   typography: {
     fontFamily:
       '"Inter Variable", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-    h1: { fontWeight: 800, letterSpacing: "-0.02em" },
-    h2: { fontWeight: 800, letterSpacing: "-0.02em" },
-    h3: { fontWeight: 700, letterSpacing: "-0.02em" },
-    h4: { fontWeight: 700, letterSpacing: "-0.01em" },
+    h1: { fontWeight: 800, letterSpacing: "-0.03em", lineHeight: 1.08 },
+    h2: { fontWeight: 800, letterSpacing: "-0.025em", lineHeight: 1.14 },
+    h3: { fontWeight: 800, letterSpacing: "-0.02em", lineHeight: 1.2 },
+    h4: { fontWeight: 700, letterSpacing: "-0.015em" },
     h5: { fontWeight: 700 },
     h6: { fontWeight: 700 },
     subtitle1: { fontWeight: 600 },
     subtitle2: { fontWeight: 600 },
     button: { fontWeight: 600 },
-    overline: { fontWeight: 700, letterSpacing: "0.08em" },
+    overline: { fontWeight: 700, letterSpacing: "0.14em" },
   },
   components: {
-    MuiPaper: {
-      styleOverrides: { root: { backgroundImage: "none" } },
-    },
+    MuiPaper: { styleOverrides: { root: { backgroundImage: "none" } } },
     MuiCard: {
       defaultProps: { elevation: 0 },
       styleOverrides: {
         root: {
-          borderRadius: 16,
-          border: "1px solid rgba(145,158,171,0.16)",
-          boxShadow:
-            "0 0 2px 0 rgba(145,158,171,0.20), 0 12px 24px -4px rgba(145,158,171,0.12)",
+          borderRadius: radii.lg,
+          border: `1px solid ${colors.border}`,
+          boxShadow: shadows.card,
         },
       },
     },
     MuiButton: {
       defaultProps: { disableElevation: true },
       styleOverrides: {
-        root: { borderRadius: 10, textTransform: "none", fontWeight: 600 },
+        root: {
+          borderRadius: radii.sm + 2,
+          textTransform: "none",
+          fontWeight: 600,
+          transition: `background-color ${motion.fast} ${motion.ease}, box-shadow ${motion.base} ${motion.ease}, transform ${motion.fast} ${motion.ease}`,
+        },
         sizeMedium: { paddingTop: 8, paddingBottom: 8 },
+        sizeLarge: { paddingTop: 12, paddingBottom: 12, paddingLeft: 24, paddingRight: 24 },
+        containedPrimary: {
+          "&:hover": { boxShadow: `0 12px 24px -12px ${withAlpha(colors.primary, 0.8)}` },
+        },
       },
     },
-    MuiChip: {
-      styleOverrides: { root: { fontWeight: 600, borderRadius: 8 } },
-    },
+    MuiChip: { styleOverrides: { root: { fontWeight: 600, borderRadius: radii.sm } } },
+    /* `spacing` becomes a real CSS gap, so a Stack that wraps does not leave the
+       staircase of margins the margin-based default produces. */
+    MuiStack: { defaultProps: { useFlexGap: true } },
     MuiTable: {
       styleOverrides: {
         root: {
-          // subtle zebra striping so rows/columns read clearly
-          "& tbody tr:nth-of-type(odd)": { backgroundColor: "rgba(79,70,229,0.025)" },
-          "& tbody tr:hover": { backgroundColor: "rgba(79,70,229,0.06)" },
+          "& tbody tr:nth-of-type(odd)": { backgroundColor: withAlpha(colors.primary, 0.025) },
+          "& tbody tr:hover": { backgroundColor: withAlpha(colors.primary, 0.06) },
         },
       },
     },
     MuiTableCell: {
       styleOverrides: {
-        root: { borderBottom: "1px solid rgba(145,158,171,0.16)" },
+        root: { borderBottom: `1px solid ${colors.divider}` },
         head: {
-          color: "#4a4a63",
-          backgroundColor: "rgba(79,70,229,0.07)",
+          color: colors.textSecondary,
+          backgroundColor: withAlpha(colors.primary, 0.07),
           fontWeight: 700,
           fontSize: 12,
           textTransform: "uppercase",
           letterSpacing: "0.04em",
-          borderBottom: "1px solid rgba(79,70,229,0.14)",
+          borderBottom: `1px solid ${withAlpha(colors.primary, 0.14)}`,
         },
       },
     },
     MuiListItemButton: {
       styleOverrides: {
         root: {
-          borderRadius: 10,
+          borderRadius: radii.sm + 2,
           marginBottom: 2,
           "&.Mui-selected": {
-            backgroundColor: "rgba(79,70,229,0.10)",
-            color: "#4f46e5",
-            "&:hover": { backgroundColor: "rgba(79,70,229,0.16)" },
-            "& .MuiListItemIcon-root": { color: "#4f46e5" },
+            backgroundColor: withAlpha(colors.primary, 0.1),
+            color: colors.primary,
+            "&:hover": { backgroundColor: withAlpha(colors.primary, 0.16) },
+            "& .MuiListItemIcon-root": { color: colors.primary },
           },
         },
+      },
+    },
+    MuiDialog: { styleOverrides: { paper: { borderRadius: radii.lg } } },
+    MuiTooltip: {
+      styleOverrides: {
+        tooltip: { backgroundColor: colors.inverse, fontSize: 12, borderRadius: radii.sm, padding: "6px 10px" },
+        arrow: { color: colors.inverse },
       },
     },
   },

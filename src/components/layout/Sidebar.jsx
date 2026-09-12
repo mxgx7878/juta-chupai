@@ -18,7 +18,7 @@ import { navigationGroups, secondaryNavigation } from "@/config/navigation";
 export const SIDEBAR_WIDTH = 272;
 
 function isActive(pathname, href) {
-  if (href === "/") return pathname === "/";
+  if (href === "/admin") return pathname === "/admin";
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
@@ -28,7 +28,7 @@ export default function Sidebar({ onNavigate }) {
   const messagesBadge = useSelector((s) => s.messages.conversations.reduce((a, c) => a + (c.unread || 0), 0));
   const vendorsBadge = useSelector((s) => s.vendors.items.filter((v) => v.status === "Pending").length);
   const badgeFor = (href) =>
-    ({ "/messages": messagesBadge, "/vendors": vendorsBadge }[href]) || 0;
+    ({ "/admin/messages": messagesBadge, "/admin/vendors": vendorsBadge }[href]) || 0;
 
   const renderItem = (item) => {
     const Icon = item.icon;

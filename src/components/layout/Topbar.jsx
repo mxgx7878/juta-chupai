@@ -85,7 +85,7 @@ export default function Topbar({ onMenuClick }) {
         <Box sx={{ flex: 1 }} />
 
         <IconButton
-          onClick={() => router.push("/notifications")}
+          onClick={() => router.push("/admin/notifications")}
           sx={{ bgcolor: "background.paper", border: "1px solid", borderColor: "divider", borderRadius: 2 }}
         >
           <Badge color="error" variant="dot">
@@ -126,7 +126,7 @@ export default function Topbar({ onMenuClick }) {
             <ListItemIcon><PersonRoundedIcon fontSize="small" /></ListItemIcon>
             Profile
           </MenuItem>
-          <MenuItem onClick={() => { setAnchor(null); router.push("/settings"); }}>
+          <MenuItem onClick={() => { setAnchor(null); router.push("/admin/settings"); }}>
             <ListItemIcon><SettingsRoundedIcon fontSize="small" /></ListItemIcon>
             Settings
           </MenuItem>

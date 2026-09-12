@@ -16,30 +16,30 @@ export const navigationGroups = [
   {
     label: "Workspace",
     items: [
-      { label: "Overview", icon: SpaceDashboardRoundedIcon, href: "/" },
-      { label: "Calculator", icon: CalculateRoundedIcon, href: "/calculator" },
-      { label: "Messages", icon: ChatRoundedIcon, href: "/messages" },
+      { label: "Overview", icon: SpaceDashboardRoundedIcon, href: "/admin" },
+      { label: "Calculator", icon: CalculateRoundedIcon, href: "/admin/calculator" },
+      { label: "Messages", icon: ChatRoundedIcon, href: "/admin/messages" },
     ],
   },
   {
     label: "Marketplace",
     items: [
-      { label: "Customers", icon: GroupRoundedIcon, href: "/customers" },
-      { label: "Vendors", icon: StorefrontRoundedIcon, href: "/vendors" },
-      { label: "Categories", icon: CategoryRoundedIcon, href: "/categories" },
-      { label: "Cities", icon: PlaceRoundedIcon, href: "/cities" },
+      { label: "Customers", icon: GroupRoundedIcon, href: "/admin/customers" },
+      { label: "Vendors", icon: StorefrontRoundedIcon, href: "/admin/vendors" },
+      { label: "Categories", icon: CategoryRoundedIcon, href: "/admin/categories" },
+      { label: "Cities", icon: PlaceRoundedIcon, href: "/admin/cities" },
     ],
   },
   {
     label: "Engagement",
     items: [
-      { label: "Banners", icon: ViewCarouselRoundedIcon, href: "/banners" },
-      { label: "Notifications", icon: NotificationsRoundedIcon, href: "/notifications" },
-      { label: "Reports", icon: InsightsRoundedIcon, href: "/reports" },
+      { label: "Banners", icon: ViewCarouselRoundedIcon, href: "/admin/banners" },
+      { label: "Notifications", icon: NotificationsRoundedIcon, href: "/admin/notifications" },
+      { label: "Reports", icon: InsightsRoundedIcon, href: "/admin/reports" },
     ],
   },
 ];
 
 export const secondaryNavigation = [
-  { label: "Settings", icon: SettingsRoundedIcon, href: "/settings" },
+  { label: "Settings", icon: SettingsRoundedIcon, href: "/admin/settings" },
 ];
